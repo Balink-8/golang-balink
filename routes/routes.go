@@ -107,5 +107,7 @@ func New() *echo.Echo {
 
 	auth.GET("/user/:id_user/keranjang", keranjangC.GetKeranjangByUserController)
 
+	//testing
+
 	return e
 }
