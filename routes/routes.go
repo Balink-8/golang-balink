@@ -47,6 +47,10 @@ var (
 	promoS = s.NewPromoService(promoR)
 	promoC = c.NewPromoController(promoS)
 
+	transaksiR = r.NewTransaksiRepository(DB)
+	transaksiS = s.NewTransaksiService(transaksiR)
+	transaksiC = c.NewTransaksiController(transaksiS)
+
 )
 
 func New() *echo.Echo {
@@ -102,6 +106,12 @@ func New() *echo.Echo {
 	auth.POST("/promo", promoC.CreateController)
 	auth.DELETE("/promo/:id", promoC.DeleteController)
 	auth.PUT("/promo/:id", promoC.UpdateController)
+
+	auth.GET("/transaksi", transaksiC.GetTransaksisController)
+	auth.GET("/transaksi/:id", transaksiC.GetTransaksiController)
+	auth.POST("/transaksi", transaksiC.CreateController)
+	auth.DELETE("/transaksi/:id", transaksiC.DeleteController)
+	auth.PUT("/transaksi/:id", transaksiC.UpdateController)
 
 	e.POST("/login", userC.LoginController)
 
