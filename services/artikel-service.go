@@ -6,7 +6,7 @@ import (
 )
 
 type ArtikelService interface {
-	GetArtikelsService() ([]*models.Artikel, error)
+	GetArtikelsService(page int, limit int) ([]*models.Artikel, int, error)
 	GetArtikelService(id string) (*models.Artikel, error)
 	CreateService(Artikel models.Artikel) (*models.Artikel, error)
 	UpdateService(id string, ArtikelBody models.Artikel) (*models.Artikel, error)
@@ -23,13 +23,13 @@ func NewArtikelService(ArtikelR repositories.ArtikelRepository) ArtikelService {
 	}
 }
 
-func (a *artikelService) GetArtikelsService() ([]*models.Artikel, error) {
-	Artikels, err := a.ArtikelR.GetArtikelsRepository()
+func (a *artikelService) GetArtikelsService(page int, limit int) ([]*models.Artikel, int, error) {
+	Artikels, totalData, err := a.ArtikelR.GetArtikelsRepository(page, limit)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return Artikels, nil
+	return Artikels, totalData, nil
 }
 
 func (a *artikelService) GetArtikelService(id string) (*models.Artikel, error) {

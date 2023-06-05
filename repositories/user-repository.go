@@ -7,7 +7,7 @@ import (
 )
 
 type UserRepository interface {
-	GetUsersRepository() ([]*models.User, error)
+	GetUsersRepository(page int, limit int) ([]*models.User, int, error)
 	GetUserRepository(id string) (*models.User, error)
 	CreateRepository(user models.User) (*models.User, error)
 	UpdateRepository(id string, userBody models.User) (*models.User, error)
@@ -25,14 +25,20 @@ func NewUserRepository(DB *gorm.DB) UserRepository {
 	}
 }
 
-func (u *userRepository) GetUsersRepository() ([]*models.User, error) {
-	var users []*models.User
+func (u *userRepository) GetUsersRepository(page int, limit int) ([]*models.User, int, error) {
+	var Users []*models.User
+	var totalData int64
 
-	if err := u.DB.Find(&users).Error; err != nil {
-		return nil, err
+	if err := u.DB.Model(&models.User{}).Count(&totalData).Error; err != nil {
+		return nil, 0, err
 	}
 
-	return users, nil
+	offset := (page - 1) * limit
+	if err := u.DB.Offset(offset).Limit(limit).Find(&Users).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return Users, int(totalData), nil
 }
 
 func (u *userRepository) GetUserRepository(id string) (*models.User, error) {

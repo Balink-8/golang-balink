@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 
@@ -29,7 +30,17 @@ func NewKategoriProdukController(KategoriProdukS services.KategoriProdukService)
 }
 
 func (k *kategoriProdukController) GetKategoriProduksController(c echo.Context) error {
-	KategoriProduks, err := k.KategoriProdukS.GetKategoriProduksService()
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+
+	KategoriProduks, totalData, err := k.KategoriProdukS.GetKategoriProduksService(page, limit)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -38,8 +49,15 @@ func (k *kategoriProdukController) GetKategoriProduksController(c echo.Context) 
 		})
 	}
 
+	responseData := map[string]interface{}{
+		"data":       KategoriProduks,
+		"page":       page,
+		"data_shown": len(KategoriProduks),
+		"total_data": totalData,
+	}
+
 	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    KategoriProduks,
+		Data:    responseData,
 		Message: "Get all KategoriProduks success",
 		Status:  true,
 	})

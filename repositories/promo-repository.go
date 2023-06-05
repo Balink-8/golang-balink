@@ -7,7 +7,7 @@ import (
 )
 
 type PromoRepository interface {
-	GetPromosRepository() ([]*models.Promo, error)
+	GetPromosRepository(page int, limit int) ([]*models.Promo, int, error)
 	GetPromoRepository(id string) (*models.Promo, error)
 	CreateRepository(Promo models.Promo) (*models.Promo, error)
 	UpdateRepository(id string, PromoBody models.Promo) (*models.Promo, error)
@@ -24,14 +24,20 @@ func NewPromoRepository(DB *gorm.DB) PromoRepository {
 	}
 }
 
-func (p *promoRepository) GetPromosRepository() ([]*models.Promo, error) {
+func (p *promoRepository) GetPromosRepository(page int, limit int) ([]*models.Promo, int, error) {
 	var Promos []*models.Promo
+	var totalData int64
 
-	if err := p.DB.Find(&Promos).Error; err != nil {
-		return nil, err
+	if err := p.DB.Model(&models.Promo{}).Count(&totalData).Error; err != nil {
+		return nil, 0, err
 	}
 
-	return Promos, nil
+	offset := (page - 1) * limit
+	if err := p.DB.Offset(offset).Limit(limit).Find(&Promos).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return Promos, int(totalData), nil
 }
 
 func (p *promoRepository) GetPromoRepository(id string) (*models.Promo, error) {
@@ -58,13 +64,13 @@ func (p *promoRepository) UpdateRepository(id string, PromoBody models.Promo) (*
 		return nil, err
 	}
 
-	err = p.DB.Where("ID = ?", id).Updates(models.Promo{Kode: PromoBody.Kode, Potongan_Harga: PromoBody.Potongan_Harga}).Error
+	err = p.DB.Where("ID = ?", id).Updates(models.Promo{Kode: PromoBody.Kode, PotonganHarga: PromoBody.PotonganHarga}).Error
 	if err != nil {
 		return nil, err
 	}
 
 	Promo.Kode = PromoBody.Kode
-	Promo.Potongan_Harga = PromoBody.Potongan_Harga
+	Promo.PotonganHarga = PromoBody.PotonganHarga
 
 	return Promo, nil
 }

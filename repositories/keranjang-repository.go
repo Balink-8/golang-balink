@@ -7,7 +7,7 @@ import (
 )
 
 type KeranjangRepository interface {
-	GetKeranjangsRepository() ([]*models.Keranjang, error)
+	GetKeranjangsRepository(page int, limit int) ([]*models.Keranjang, int, error)
 	GetKeranjangRepository(id string) (*models.Keranjang, error)
 	CreateRepository(Keranjang models.Keranjang) (*models.Keranjang, error)
 	UpdateRepository(id string, KeranjangBody models.Keranjang) (*models.Keranjang, error)
@@ -25,14 +25,20 @@ func NewKeranjangRepository(DB *gorm.DB) KeranjangRepository {
 	}
 }
 
-func (k *keranjangRepository) GetKeranjangsRepository() ([]*models.Keranjang, error) {
+func (k *keranjangRepository) GetKeranjangsRepository(page int, limit int) ([]*models.Keranjang, int, error) {
 	var Keranjangs []*models.Keranjang
+	var totalData int64
 
-	if err := k.DB.Find(&Keranjangs).Error; err != nil {
-		return nil, err
+	if err := k.DB.Model(&models.Keranjang{}).Count(&totalData).Error; err != nil {
+		return nil, 0, err
 	}
 
-	return Keranjangs, nil
+	offset := (page - 1) * limit
+	if err := k.DB.Offset(offset).Limit(limit).Find(&Keranjangs).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return Keranjangs, int(totalData), nil
 }
 
 func (k *keranjangRepository) GetKeranjangRepository(id string) (*models.Keranjang, error) {

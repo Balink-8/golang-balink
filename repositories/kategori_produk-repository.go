@@ -7,7 +7,7 @@ import (
 )
 
 type KategoriProdukRepository interface {
-	GetKategoriProduksRepository() ([]*models.KategoriProduk, error)
+	GetKategoriProduksRepository(page int, limit int) ([]*models.KategoriProduk, int, error)
 	GetKategoriProdukRepository(id string) (*models.KategoriProduk, error)
 	CreateRepository(KategoriProduk models.KategoriProduk) (*models.KategoriProduk, error)
 	UpdateRepository(id string, KategoriProdukBody models.KategoriProduk) (*models.KategoriProduk, error)
@@ -24,14 +24,20 @@ func NewKategoriProdukRepository(DB *gorm.DB) KategoriProdukRepository {
 	}
 }
 
-func (k *kategoriProdukRepository) GetKategoriProduksRepository() ([]*models.KategoriProduk, error) {
+func (k *kategoriProdukRepository) GetKategoriProduksRepository(page int, limit int) ([]*models.KategoriProduk, int, error) {
 	var KategoriProduks []*models.KategoriProduk
+	var totalData int64
 
-	if err := k.DB.Find(&KategoriProduks).Error; err != nil {
-		return nil, err
+	if err := k.DB.Model(&models.KategoriProduk{}).Count(&totalData).Error; err != nil {
+		return nil, 0, err
 	}
 
-	return KategoriProduks, nil
+	offset := (page - 1) * limit
+	if err := k.DB.Offset(offset).Limit(limit).Find(&KategoriProduks).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return KategoriProduks, int(totalData), nil
 }
 
 func (k *kategoriProdukRepository) GetKategoriProdukRepository(id string) (*models.KategoriProduk, error) {
