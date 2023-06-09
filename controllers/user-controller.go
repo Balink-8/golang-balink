@@ -233,3 +233,43 @@ func (u *userController) LoginController(c echo.Context) error {
 		Status:  true,
 	})
 }
+
+func (u *userController) RegisterController(c echo.Context) error {
+	var user models.CreateUser
+
+	err := c.Bind(&user.User)
+	if err != nil {
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
+	}
+
+	user.User, err = u.userS.LoginService(*user.User)
+	if err != nil {
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
+	}
+
+	token, err := u.jwt.CreateJWTToken(user.User.ID, user.User.Nama)
+	if err != nil {
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
+	}
+
+	user.User.Password = "-"
+
+	user.Token = token
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    user,
+		Message: "Login success",
+		Status:  true,
+	})
+}

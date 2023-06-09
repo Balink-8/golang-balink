@@ -95,3 +95,11 @@ func (u *userRepository) LoginRepository(login models.User) (*models.User, error
 
 	return &login, nil
 }
+
+func (u *userRepository) RegisterRepository(register models.User) (*models.User, error) {
+	if err := u.DB.Where("email = ? AND password = ?", register.Email, register.Password).First(&register).Error; err != nil {
+		return nil, err
+	}
+
+	return &register, nil
+}

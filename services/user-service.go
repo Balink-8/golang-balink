@@ -12,6 +12,7 @@ type UserService interface {
 	UpdateService(id string, userBody models.User) (*models.User, error)
 	DeleteService(id string) error
 	LoginService(login models.User) (*models.User, error)
+	RegisterService(register models.User) (*models.User, error)
 }
 
 type userService struct {
@@ -76,4 +77,13 @@ func (u *userService) LoginService(login models.User) (*models.User, error) {
 	}
 
 	return loginR, nil
+}
+
+func (u *userService) RegisterService(register models.User) (*models.User, error) {
+	RegisterR, err := u.userR.RegisterRepository(register)
+	if err != nil {
+		return nil, err
+	}
+
+	return RegisterR, nil
 }
