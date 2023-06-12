@@ -47,6 +47,10 @@ var (
 	promoS = s.NewPromoService(promoR)
 	promoC = c.NewPromoController(promoS)
 
+	masalahR = r.NewMasalahRepository(DB)
+	masalahS = s.NewMasalahService(masalahR)
+	masalahC = c.NewMasalahController(masalahS)
+
 )
 
 func New() *echo.Echo {
@@ -65,7 +69,10 @@ func New() *echo.Echo {
 	auth.GET("/user/:id", userC.GetUserController)
 	e.POST("/user", userC.CreateController)
 	auth.DELETE("/user/:id", userC.DeleteController)
-	auth.PUT("/user/:id", userC.UpdateController)
+	auth.PUT("/user/:id", userC.UpdateUserController)
+
+	auth.GET("/admin", userC.GetAdminController)
+	auth.PUT("/admin", userC.UpdateAdminController)
 
 	auth.GET("/produk", produkC.GetProduksController)
 	auth.GET("/produk/:id", produkC.GetProdukController)
@@ -102,6 +109,10 @@ func New() *echo.Echo {
 	auth.POST("/promo", promoC.CreateController)
 	auth.DELETE("/promo/:id", promoC.DeleteController)
 	auth.PUT("/promo/:id", promoC.UpdateController)
+
+	auth.GET("/masalah", masalahC.GetMasalahsController)
+	auth.GET("/masalah/:id", masalahC.GetMasalahController)
+	auth.POST("/masalah", masalahC.CreateController)
 
 	e.POST("/login", userC.LoginController)
 

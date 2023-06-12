@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 
@@ -28,8 +29,20 @@ func NewProdukController(ProdukS services.ProdukService) ProdukController {
 	}
 }
 
-func (pr *produkController) GetProduksController(c echo.Context) error {
-	Produks, err := pr.ProdukS.GetProduksService()
+func (p *produkController) GetProduksController(c echo.Context) error {
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+
+	order := c.QueryParam("order")
+
+	Produks, totalData, err := p.ProdukS.GetProduksService(page, limit, order)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -38,14 +51,21 @@ func (pr *produkController) GetProduksController(c echo.Context) error {
 		})
 	}
 
+	responseData := map[string]interface{}{
+		"data":       Produks,
+		"page":       page,
+		"data_shown": len(Produks),
+		"total_data": totalData,
+	}
+
 	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    Produks,
-		Message: "Get all Produks success",
+		Data:    responseData,
+		Message: "Get all Produk success",
 		Status:  true,
 	})
 }
 
-func (pr *produkController) GetProdukController(c echo.Context) error {
+func (p *produkController) GetProdukController(c echo.Context) error {
 	id := c.Param("id")
 
 	err := h.IsNumber(id)
@@ -59,7 +79,7 @@ func (pr *produkController) GetProdukController(c echo.Context) error {
 
 	var Produk *models.Produk
 
-	Produk, err = pr.ProdukS.GetProdukService(id)
+	Produk, err = p.ProdukS.GetProdukService(id)
 	if err != nil {
 		return h.Response(c, http.StatusNotFound, h.ResponseModel{
 			Data:    nil,
@@ -75,7 +95,7 @@ func (pr *produkController) GetProdukController(c echo.Context) error {
 	})
 }
 
-func (pr *produkController) CreateController(c echo.Context) error {
+func (p *produkController) CreateController(c echo.Context) error {
 	var Produk *models.Produk
 
 	err := c.Bind(&Produk)
@@ -87,7 +107,7 @@ func (pr *produkController) CreateController(c echo.Context) error {
 		})
 	}
 
-	Produk, err = pr.ProdukS.CreateService(*Produk)
+	Produk, err = p.ProdukS.CreateService(*Produk)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -103,7 +123,7 @@ func (pr *produkController) CreateController(c echo.Context) error {
 	})
 }
 
-func (pr *produkController) UpdateController(c echo.Context) error {
+func (p *produkController) UpdateController(c echo.Context) error {
 	id := c.Param("id")
 
 	err := h.IsNumber(id)
@@ -126,7 +146,7 @@ func (pr *produkController) UpdateController(c echo.Context) error {
 		})
 	}
 
-	Produk, err = pr.ProdukS.UpdateService(id, *Produk)
+	Produk, err = p.ProdukS.UpdateService(id, *Produk)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -142,7 +162,7 @@ func (pr *produkController) UpdateController(c echo.Context) error {
 	})
 }
 
-func (pr *produkController) DeleteController(c echo.Context) error {
+func (p *produkController) DeleteController(c echo.Context) error {
 	id := c.Param("id")
 
 	err := h.IsNumber(id)
@@ -154,7 +174,7 @@ func (pr *produkController) DeleteController(c echo.Context) error {
 		})
 	}
 
-	err = pr.ProdukS.DeleteService(id)
+	err = p.ProdukS.DeleteService(id)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,

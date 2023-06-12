@@ -6,35 +6,46 @@ import (
 )
 
 type UserService interface {
-	GetUsersService() ([]*models.User, error)
+	GetUsersService(page int, limit int, order string) ([]*models.User, int, error)
 	GetUserService(id string) (*models.User, error)
+	GetAdminService() (*models.User, error)
 	CreateService(user models.User) (*models.User, error)
-	UpdateService(id string, userBody models.User) (*models.User, error)
+	UpdateUserService(id string, userBody models.User) (*models.User, error)
+	UpdateAdminService(userBody models.User) (*models.User, error)
 	DeleteService(id string) error
 	LoginService(login models.User) (*models.User, error)
 }
 
 type userService struct {
-	userR repositories.UserRepository
+	UserR repositories.UserRepository
 }
 
-func NewUserService(userR repositories.UserRepository) UserService {
+func NewUserService(UserR repositories.UserRepository) UserService {
 	return &userService{
-		userR: userR,
+		UserR: UserR,
 	}
 }
 
-func (u *userService) GetUsersService() ([]*models.User, error) {
-	users, err := u.userR.GetUsersRepository()
+func (u *userService) GetUsersService(page int, limit int, order string) ([]*models.User, int, error) {
+	Users, totalData, err := u.UserR.GetUsersRepository(page, limit, order)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return Users, totalData, nil
+}
+
+func (u *userService) GetUserService(id string) (*models.User, error) {
+	user, err := u.UserR.GetUserRepository(id)
 	if err != nil {
 		return nil, err
 	}
 
-	return users, nil
+	return user, nil
 }
 
-func (u *userService) GetUserService(id string) (*models.User, error) {
-	user, err := u.userR.GetUserRepository(id)
+func (u *userService) GetAdminService() (*models.User, error) {
+	user, err := u.UserR.GetAdminRepository()
 	if err != nil {
 		return nil, err
 	}
@@ -43,16 +54,25 @@ func (u *userService) GetUserService(id string) (*models.User, error) {
 }
 
 func (u *userService) CreateService(user models.User) (*models.User, error) {
-	userR, err := u.userR.CreateRepository(user)
+	UserR, err := u.UserR.CreateRepository(user)
 	if err != nil {
 		return nil, err
 	}
 
-	return userR, nil
+	return UserR, nil
 }
 
-func (u *userService) UpdateService(id string, userBody models.User) (*models.User, error) {
-	user, err := u.userR.UpdateRepository(id, userBody)
+func (u *userService) UpdateUserService(id string, userBody models.User) (*models.User, error) {
+	user, err := u.UserR.UpdateUserRepository(id, userBody)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (u *userService) UpdateAdminService(userBody models.User) (*models.User, error) {
+	user, err := u.UserR.UpdateAdminRepository(userBody)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +81,7 @@ func (u *userService) UpdateService(id string, userBody models.User) (*models.Us
 }
 
 func (u *userService) DeleteService(id string) error {
-	err := u.userR.DeleteRepository(id)
+	err := u.UserR.DeleteRepository(id)
 	if err != nil {
 		return err
 	}
@@ -70,7 +90,7 @@ func (u *userService) DeleteService(id string) error {
 }
 
 func (u *userService) LoginService(login models.User) (*models.User, error) {
-	loginR, err := u.userR.LoginRepository(login)
+	loginR, err := u.UserR.LoginRepository(login)
 	if err != nil {
 		return nil, err
 	}

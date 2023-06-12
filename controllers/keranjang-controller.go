@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 
@@ -30,7 +31,19 @@ func NewKeranjangController(KeranjangS services.KeranjangService) KeranjangContr
 }
 
 func (k *keranjangController) GetKeranjangsController(c echo.Context) error {
-	Keranjangs, err := k.KeranjangS.GetKeranjangsService()
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+
+	order := c.QueryParam("order")
+
+	Keranjangs, totalData, err := k.KeranjangS.GetKeranjangsService(page, limit, order)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -39,9 +52,16 @@ func (k *keranjangController) GetKeranjangsController(c echo.Context) error {
 		})
 	}
 
+	responseData := map[string]interface{}{
+		"data":       Keranjangs,
+		"page":       page,
+		"data_shown": len(Keranjangs),
+		"total_data": totalData,
+	}
+
 	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    Keranjangs,
-		Message: "Get all Keranjangs success",
+		Data:    responseData,
+		Message: "Get all Keranjang success",
 		Status:  true,
 	})
 }

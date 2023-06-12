@@ -7,10 +7,12 @@ import (
 )
 
 type UserRepository interface {
-	GetUsersRepository() ([]*models.User, error)
+	GetUsersRepository(page int, limit int, order string) ([]*models.User, int, error)
 	GetUserRepository(id string) (*models.User, error)
+	GetAdminRepository() (*models.User, error)
 	CreateRepository(user models.User) (*models.User, error)
-	UpdateRepository(id string, userBody models.User) (*models.User, error)
+	UpdateUserRepository(id string, userBody models.User) (*models.User, error)
+	UpdateAdminRepository(userBody models.User) (*models.User, error)
 	DeleteRepository(id string) error
 	LoginRepository(login models.User) (*models.User, error)
 }
@@ -25,20 +27,45 @@ func NewUserRepository(DB *gorm.DB) UserRepository {
 	}
 }
 
-func (u *userRepository) GetUsersRepository() ([]*models.User, error) {
-	var users []*models.User
+func (u *userRepository) GetUsersRepository(page int, limit int, order string) ([]*models.User, int, error) {
+	var Users []*models.User
+	var totalData int64
 
-	if err := u.DB.Find(&users).Error; err != nil {
-		return nil, err
+	if err := u.DB.Model(&models.User{}).Count(&totalData).Error; err != nil {
+		return nil, 0, err
 	}
 
-	return users, nil
+	offset := (page - 1) * limit
+	query := u.DB.Offset(offset).Limit(limit)
+
+	switch order {
+	case "asc":
+		query = query.Order("ID ASC")
+	case "desc":
+		query = query.Order("ID DESC")
+	}
+
+	if err := query.Find(&Users).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return Users, int(totalData), nil
 }
 
 func (u *userRepository) GetUserRepository(id string) (*models.User, error) {
 	var user models.User
 
 	if err := u.DB.Where("ID = ?", id).Take(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (u *userRepository) GetAdminRepository() (*models.User, error) {
+	var user models.User
+
+	if err := u.DB.Where("role = ?", "admin").First(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -53,7 +80,7 @@ func (u *userRepository) CreateRepository(user models.User) (*models.User, error
 	return &user, nil
 }
 
-func (u *userRepository) UpdateRepository(id string, userBody models.User) (*models.User, error) {
+func (u *userRepository) UpdateUserRepository(id string, userBody models.User) (*models.User, error) {
 	user, err := u.GetUserRepository(id)
 	if err != nil {
 		return nil, err
@@ -70,7 +97,28 @@ func (u *userRepository) UpdateRepository(id string, userBody models.User) (*mod
 	user.Password = userBody.Password
 	user.No_Telepon = userBody.No_Telepon
 	user.Alamat = userBody.Alamat
-	user.Role = userBody.Role
+	user.Role = "user"
+
+	return user, nil
+}
+
+func (u *userRepository) UpdateAdminRepository(userBody models.User) (*models.User, error) {
+	user, err := u.GetAdminRepository()
+	if err != nil {
+		return nil, err
+	}
+
+	err = u.DB.Model(&user).Updates(models.User{
+		Nama:           userBody.Nama,
+		Foto_Profile:   userBody.Foto_Profile,
+		Email:          userBody.Email,
+		Password:       userBody.Password,
+		No_Telepon:     userBody.No_Telepon,
+		Alamat:         userBody.Alamat,
+	}).Error
+	if err != nil {
+		return nil, err
+	}
 
 	return user, nil
 }
