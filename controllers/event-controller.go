@@ -40,7 +40,9 @@ func (e *eventController) GetEventsController(c echo.Context) error {
 		limit = 10
 	}
 
-	Events, totalData, err := e.EventS.GetEventsService(page, limit)
+	order := c.QueryParam("order")
+
+	Events, totalData, err := e.EventS.GetEventsService(page, limit, order)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -58,7 +60,7 @@ func (e *eventController) GetEventsController(c echo.Context) error {
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    responseData,
-		Message: "Get all Events success",
+		Message: "Get all Event success",
 		Status:  true,
 	})
 }

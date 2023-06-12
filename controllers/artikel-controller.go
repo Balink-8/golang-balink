@@ -40,7 +40,9 @@ func (a *artikelController) GetArtikelsController(c echo.Context) error {
 		limit = 10
 	}
 
-	Artikels, totalData, err := a.ArtikelS.GetArtikelsService(page, limit)
+	order := c.QueryParam("order")
+
+	Artikels, totalData, err := a.ArtikelS.GetArtikelsService(page, limit, order)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -58,10 +60,11 @@ func (a *artikelController) GetArtikelsController(c echo.Context) error {
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    responseData,
-		Message: "Get all Artikels success",
+		Message: "Get all Artikel success",
 		Status:  true,
 	})
 }
+
 
 func (a *artikelController) GetArtikelController(c echo.Context) error {
 	id := c.Param("id")

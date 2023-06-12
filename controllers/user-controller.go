@@ -15,8 +15,10 @@ import (
 type UserController interface {
 	GetUsersController(c echo.Context) error
 	GetUserController(c echo.Context) error
+	GetAdminController(c echo.Context) error
 	CreateController(c echo.Context) error
-	UpdateController(c echo.Context) error
+	UpdateUserController(c echo.Context) error
+	UpdateAdminController(c echo.Context) error
 	DeleteController(c echo.Context) error
 	LoginController(c echo.Context) error
 }
@@ -44,7 +46,9 @@ func (u *userController) GetUsersController(c echo.Context) error {
 		limit = 10
 	}
 
-	users, totalData, err := u.UserS.GetUsersService(page, limit)
+	order := c.QueryParam("order")
+
+	Users, totalData, err := u.UserS.GetUsersService(page, limit, order)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -53,20 +57,16 @@ func (u *userController) GetUsersController(c echo.Context) error {
 		})
 	}
 
-	for _,user := range users {
-		user.Password = "-"
-	}
-
 	responseData := map[string]interface{}{
-		"data":       users,
+		"data":       Users,
 		"page":       page,
-		"data_shown": len(users),
+		"data_shown": len(Users),
 		"total_data": totalData,
 	}
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    responseData,
-		Message: "Get all Users success",
+		Message: "Get all User success",
 		Status:  true,
 	})
 }
@@ -99,6 +99,23 @@ func (u *userController) GetUserController(c echo.Context) error {
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    user,
 		Message: "Get user success",
+		Status:  true,
+	})
+}
+
+func (u *userController) GetAdminController(c echo.Context) error {
+	user, err := u.UserS.GetAdminService()
+	if err != nil {
+		return h.Response(c, http.StatusInternalServerError, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
+	}
+
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    user,
+		Message: "Get admin success",
 		Status:  true,
 	})
 }
@@ -143,7 +160,7 @@ func (u *userController) CreateController(c echo.Context) error {
 	})
 }
 
-func (u *userController) UpdateController(c echo.Context) error {
+func (u *userController) UpdateUserController(c echo.Context) error {
 	id := c.Param("id")
 
 	err := h.IsNumber(id)
@@ -166,7 +183,7 @@ func (u *userController) UpdateController(c echo.Context) error {
 		})
 	}
 
-	user, err = u.UserS.UpdateService(id, *user)
+	user, err = u.UserS.UpdateUserService(id, *user)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -180,6 +197,34 @@ func (u *userController) UpdateController(c echo.Context) error {
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    user,
 		Message: "Update user success",
+		Status:  true,
+	})
+}
+
+func (u *userController) UpdateAdminController(c echo.Context) error {
+	var userBody models.User
+	if err := c.Bind(&userBody); err != nil {
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
+	}
+
+	user, err := u.UserS.UpdateAdminService(userBody)
+	if err != nil {
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
+	}
+
+	user.Password = "-"
+
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    user,
+		Message: "Update admin success",
 		Status:  true,
 	})
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type ProdukRepository interface {
-	GetProduksRepository(page int, limit int) ([]*models.Produk, int, error)
+	GetProduksRepository(page int, limit int, order string) ([]*models.Produk, int, error)
 	GetProdukRepository(id string) (*models.Produk, error)
 	CreateRepository(Produk models.Produk) (*models.Produk, error)
 	UpdateRepository(id string, ProdukBody models.Produk) (*models.Produk, error)
@@ -24,7 +24,7 @@ func NewProdukRepository(DB *gorm.DB) ProdukRepository {
 	}
 }
 
-func (p *produkRepository) GetProduksRepository(page int, limit int) ([]*models.Produk, int, error) {
+func (p *produkRepository) GetProduksRepository(page int, limit int, order string) ([]*models.Produk, int, error) {
 	var Produks []*models.Produk
 	var totalData int64
 
@@ -33,7 +33,16 @@ func (p *produkRepository) GetProduksRepository(page int, limit int) ([]*models.
 	}
 
 	offset := (page - 1) * limit
-	if err := p.DB.Offset(offset).Limit(limit).Find(&Produks).Error; err != nil {
+	query := p.DB.Offset(offset).Limit(limit)
+
+	switch order {
+	case "asc":
+		query = query.Order("ID ASC")
+	case "desc":
+		query = query.Order("ID DESC")
+	}
+
+	if err := query.Find(&Produks).Error; err != nil {
 		return nil, 0, err
 	}
 

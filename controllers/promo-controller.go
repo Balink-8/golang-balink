@@ -40,7 +40,9 @@ func (p *promoController) GetPromosController(c echo.Context) error {
 		limit = 10
 	}
 
-	Promos, totalData, err := p.PromoS.GetPromosService(page, limit)
+	order := c.QueryParam("order")
+
+	Promos, totalData, err := p.PromoS.GetPromosService(page, limit, order)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -58,7 +60,7 @@ func (p *promoController) GetPromosController(c echo.Context) error {
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    responseData,
-		Message: "Get all Promos success",
+		Message: "Get all Promo success",
 		Status:  true,
 	})
 }

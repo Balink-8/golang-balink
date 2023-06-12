@@ -6,10 +6,12 @@ import (
 )
 
 type UserService interface {
-	GetUsersService(page int, limit int) ([]*models.User, int, error)
+	GetUsersService(page int, limit int, order string) ([]*models.User, int, error)
 	GetUserService(id string) (*models.User, error)
+	GetAdminService() (*models.User, error)
 	CreateService(user models.User) (*models.User, error)
-	UpdateService(id string, userBody models.User) (*models.User, error)
+	UpdateUserService(id string, userBody models.User) (*models.User, error)
+	UpdateAdminService(userBody models.User) (*models.User, error)
 	DeleteService(id string) error
 	LoginService(login models.User) (*models.User, error)
 }
@@ -24,8 +26,8 @@ func NewUserService(UserR repositories.UserRepository) UserService {
 	}
 }
 
-func (u *userService) GetUsersService(page int, limit int) ([]*models.User, int, error) {
-	Users, totalData, err := u.UserR.GetUsersRepository(page, limit)
+func (u *userService) GetUsersService(page int, limit int, order string) ([]*models.User, int, error) {
+	Users, totalData, err := u.UserR.GetUsersRepository(page, limit, order)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -42,6 +44,15 @@ func (u *userService) GetUserService(id string) (*models.User, error) {
 	return user, nil
 }
 
+func (u *userService) GetAdminService() (*models.User, error) {
+	user, err := u.UserR.GetAdminRepository()
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (u *userService) CreateService(user models.User) (*models.User, error) {
 	UserR, err := u.UserR.CreateRepository(user)
 	if err != nil {
@@ -51,8 +62,17 @@ func (u *userService) CreateService(user models.User) (*models.User, error) {
 	return UserR, nil
 }
 
-func (u *userService) UpdateService(id string, userBody models.User) (*models.User, error) {
-	user, err := u.UserR.UpdateRepository(id, userBody)
+func (u *userService) UpdateUserService(id string, userBody models.User) (*models.User, error) {
+	user, err := u.UserR.UpdateUserRepository(id, userBody)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (u *userService) UpdateAdminService(userBody models.User) (*models.User, error) {
+	user, err := u.UserR.UpdateAdminRepository(userBody)
 	if err != nil {
 		return nil, err
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 type ArtikelRepository interface {
-	GetArtikelsRepository(page int, limit int) ([]*models.Artikel, int, error)
+	GetArtikelsRepository(page int, limit int, order string) ([]*models.Artikel, int, error)
 	GetArtikelRepository(id string) (*models.Artikel, error)
 	CreateRepository(Artikel models.Artikel) (*models.Artikel, error)
 	UpdateRepository(id string, ArtikelBody models.Artikel) (*models.Artikel, error)
@@ -24,7 +24,7 @@ func NewArtikelRepository(DB *gorm.DB) ArtikelRepository {
 	}
 }
 
-func (a *artikelRepository) GetArtikelsRepository(page int, limit int) ([]*models.Artikel, int, error) {
+func (a *artikelRepository) GetArtikelsRepository(page int, limit int, order string) ([]*models.Artikel, int, error) {
 	var Artikels []*models.Artikel
 	var totalData int64
 
@@ -33,7 +33,16 @@ func (a *artikelRepository) GetArtikelsRepository(page int, limit int) ([]*model
 	}
 
 	offset := (page - 1) * limit
-	if err := a.DB.Offset(offset).Limit(limit).Find(&Artikels).Error; err != nil {
+	query := a.DB.Offset(offset).Limit(limit)
+
+	switch order {
+	case "asc":
+		query = query.Order("ID ASC")
+	case "desc":
+		query = query.Order("ID DESC")
+	}
+
+	if err := query.Find(&Artikels).Error; err != nil {
 		return nil, 0, err
 	}
 

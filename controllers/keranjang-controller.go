@@ -41,7 +41,9 @@ func (k *keranjangController) GetKeranjangsController(c echo.Context) error {
 		limit = 10
 	}
 
-	Keranjangs, totalData, err := k.KeranjangS.GetKeranjangsService(page, limit)
+	order := c.QueryParam("order")
+
+	Keranjangs, totalData, err := k.KeranjangS.GetKeranjangsService(page, limit, order)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -59,7 +61,7 @@ func (k *keranjangController) GetKeranjangsController(c echo.Context) error {
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    responseData,
-		Message: "Get all Keranjangs success",
+		Message: "Get all Keranjang success",
 		Status:  true,
 	})
 }

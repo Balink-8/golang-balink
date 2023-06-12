@@ -6,7 +6,7 @@ import (
 )
 
 type ProdukService interface {
-	GetProduksService(page int, limit int) ([]*models.Produk, int, error)
+	GetProduksService(page int, limit int, order string) ([]*models.Produk, int, error)
 	GetProdukService(id string) (*models.Produk, error)
 	CreateService(Produk models.Produk) (*models.Produk, error)
 	UpdateService(id string, ProdukBody models.Produk) (*models.Produk, error)
@@ -23,8 +23,8 @@ func NewProdukService(ProdukR repositories.ProdukRepository) ProdukService {
 	}
 }
 
-func (p *produkService) GetProduksService(page int, limit int) ([]*models.Produk, int, error) {
-	Produks, totalData, err := p.ProdukR.GetProduksRepository(page, limit)
+func (p *produkService) GetProduksService(page int, limit int, order string) ([]*models.Produk, int, error) {
+	Produks, totalData, err := p.ProdukR.GetProduksRepository(page, limit, order)
 	if err != nil {
 		return nil, 0, err
 	}

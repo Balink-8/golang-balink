@@ -7,7 +7,7 @@ import (
 )
 
 type PromoRepository interface {
-	GetPromosRepository(page int, limit int) ([]*models.Promo, int, error)
+	GetPromosRepository(page int, limit int, order string) ([]*models.Promo, int, error)
 	GetPromoRepository(id string) (*models.Promo, error)
 	CreateRepository(Promo models.Promo) (*models.Promo, error)
 	UpdateRepository(id string, PromoBody models.Promo) (*models.Promo, error)
@@ -24,7 +24,7 @@ func NewPromoRepository(DB *gorm.DB) PromoRepository {
 	}
 }
 
-func (p *promoRepository) GetPromosRepository(page int, limit int) ([]*models.Promo, int, error) {
+func (p *promoRepository) GetPromosRepository(page int, limit int, order string) ([]*models.Promo, int, error) {
 	var Promos []*models.Promo
 	var totalData int64
 
@@ -33,7 +33,16 @@ func (p *promoRepository) GetPromosRepository(page int, limit int) ([]*models.Pr
 	}
 
 	offset := (page - 1) * limit
-	if err := p.DB.Offset(offset).Limit(limit).Find(&Promos).Error; err != nil {
+	query := p.DB.Offset(offset).Limit(limit)
+
+	switch order {
+	case "asc":
+		query = query.Order("ID ASC")
+	case "desc":
+		query = query.Order("ID DESC")
+	}
+
+	if err := query.Find(&Promos).Error; err != nil {
 		return nil, 0, err
 	}
 

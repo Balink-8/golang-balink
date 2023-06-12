@@ -40,7 +40,9 @@ func (p *produkController) GetProduksController(c echo.Context) error {
 		limit = 10
 	}
 
-	Produks, totalData, err := p.ProdukS.GetProduksService(page, limit)
+	order := c.QueryParam("order")
+
+	Produks, totalData, err := p.ProdukS.GetProduksService(page, limit, order)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -58,7 +60,7 @@ func (p *produkController) GetProduksController(c echo.Context) error {
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    responseData,
-		Message: "Get all Produks success",
+		Message: "Get all Produk success",
 		Status:  true,
 	})
 }

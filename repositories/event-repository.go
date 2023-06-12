@@ -7,7 +7,7 @@ import (
 )
 
 type EventRepository interface {
-	GetEventsRepository(page int, limit int) ([]*models.Event, int, error)
+	GetEventsRepository(page int, limit int, order string) ([]*models.Event, int, error)
 	GetEventRepository(id string) (*models.Event, error)
 	CreateRepository(Event models.Event) (*models.Event, error)
 	UpdateRepository(id string, EventBody models.Event) (*models.Event, error)
@@ -24,7 +24,7 @@ func NewEventRepository(DB *gorm.DB) EventRepository {
 	}
 }
 
-func (e *eventRepository) GetEventsRepository(page int, limit int) ([]*models.Event, int, error) {
+func (e *eventRepository) GetEventsRepository(page int, limit int, order string) ([]*models.Event, int, error) {
 	var Events []*models.Event
 	var totalData int64
 
@@ -33,7 +33,16 @@ func (e *eventRepository) GetEventsRepository(page int, limit int) ([]*models.Ev
 	}
 
 	offset := (page - 1) * limit
-	if err := e.DB.Offset(offset).Limit(limit).Find(&Events).Error; err != nil {
+	query := e.DB.Offset(offset).Limit(limit)
+
+	switch order {
+	case "asc":
+		query = query.Order("ID ASC")
+	case "desc":
+		query = query.Order("ID DESC")
+	}
+
+	if err := query.Find(&Events).Error; err != nil {
 		return nil, 0, err
 	}
 

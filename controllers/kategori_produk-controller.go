@@ -40,7 +40,9 @@ func (k *kategoriProdukController) GetKategoriProduksController(c echo.Context) 
 		limit = 10
 	}
 
-	KategoriProduks, totalData, err := k.KategoriProdukS.GetKategoriProduksService(page, limit)
+	order := c.QueryParam("order")
+
+	KategoriProduks, totalData, err := k.KategoriProdukS.GetKategoriProduksService(page, limit, order)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -58,7 +60,7 @@ func (k *kategoriProdukController) GetKategoriProduksController(c echo.Context) 
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    responseData,
-		Message: "Get all KategoriProduks success",
+		Message: "Get all KategoriProduk success",
 		Status:  true,
 	})
 }
