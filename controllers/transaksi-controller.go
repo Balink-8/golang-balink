@@ -3,169 +3,159 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
-
-	h "capstone/helpers"
 	"capstone/models"
 	"capstone/services"
+
+	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
-type TransaksiController interface {
-	GetTransaksisController(c echo.Context) error
-	GetTransaksiController(c echo.Context) error
-	CreateController(c echo.Context) error
-	UpdateController(c echo.Context) error
-	DeleteController(c echo.Context) error
+type TransactionController interface {
+	SaveTransactionProduct(c echo.Context) error
+	DeleteTransactionProduct(c echo.Context) error
+	GetTransactionProducts(c echo.Context) error
+	SaveTransactionTicket(c echo.Context) error
+	DeleteTransactionTicket(c echo.Context) error
+	GetTransationTicket(c echo.Context) error
 }
 
-type transaksiController struct {
-	TransaksiS services.TransaksiService
+type transactionController struct {
+	Repository services.TransactionService
 }
 
-func NewTransaksiController(TransaksiS services.TransaksiService) TransaksiController {
-	return &transaksiController{
-		TransaksiS: TransaksiS,
+func SaveTransactionProduct(c echo.Context) error {
+	// Get the transaction product data from the request body
+	transactionProduct := &models.TransactionProduct{}
+	c.BindJSON(transactionProduct)
+	// Save the transaction product
+	transactionProduct, err := models.SaveTransactionProduct(transactionProduct)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+	// Return the transaction product
+	return c.JSON(http.StatusOK, transactionProduct)
 }
 
-func (t *transaksiController) GetTransaksisController(c echo.Context) error {
-	Transaksis, err := t.TransaksiS.GetTransaksisService()
+func GetTransactionProduct(c echo.Context) error {
+	// Get the transaction product ID from the request path
+	productID := c.Param("id")
+	// Get the transaction product from the database
+	transactionProduct, err := models.GetTransactionProduct(productID)
 	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
-
-	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    Transaksis,
-		Message: "Get all Transaction success",
-		Status:  true,
-	})
+	// Return the transaction product
+	return c.JSON(http.StatusOK, transactionProduct)
 }
 
-func (t *transaksiController) GetTransaksiController(c echo.Context) error {
-	id := c.Param("id")
-
-	err := h.IsNumber(id)
+func DeleteTransactionProduct(c echo.Context) error {
+	// Get the transaction product ID from the request path
+	productID := c.Param("id")
+	// Delete the transaction product from the database
+	err := models.DeleteTransactionProduct(productID)
 	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
-
-	var Transaksi *models.Transaksi
-
-	Transaksi, err = t.TransaksiS.GetTransaksiService(id)
-	if err != nil {
-		return h.Response(c, http.StatusNotFound, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
-	}
-
-	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    Transaksi,
-		Message: "Get Transaction success",
-		Status:  true,
-	})
+	// Return a success response
+	return c.JSON(http.StatusOK, gin.H{"message": "Transaction product deleted successfully"})
 }
 
-func (t *transaksiController) CreateController(c echo.Context) error {
-	var Transaksi *models.Transaksi
-
-	err := c.Bind(&Transaksi)
+func SaveTransactionTicket(c echo.Context) error {
+	// Get the transaction ticket data from the request body
+	transactionTicket := &models.Ticket{}
+	c.BindJSON(transactionTicket)
+	// Save the transaction ticket
+	transactionTicket, err := models.SaveTransactionTicket(transactionTicket)
 	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-
-	Transaksi, err = t.TransaksiS.CreateService(*Transaksi)
-	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
-	}
-
-	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    Transaksi,
-		Message: "Create Transaction success",
-		Status:  true,
-	})
+	// Return the transaction ticket
+	return c.JSON(http.StatusOK, transactionTicket)
 }
 
-func (t *transaksiController) UpdateController(c echo.Context) error {
-	id := c.Param("id")
-
-	err := h.IsNumber(id)
+func GetTransactionTicket(c echo.Context) error {
+	// Get the transaction ticket ID from the request path
+	ticketID := c.Param("id")
+	// Get the transaction ticket from the database
+	transactionTicket, err := models.GetTransactionTicket(ticketID)
 	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
-
-	var Transaksi *models.Transaksi
-
-	err = c.Bind(&Transaksi)
-	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
-	}
-
-	Transaksi, err = t.TransaksiS.UpdateService(id, *Transaksi)
-	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
-	}
-
-	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    Transaksi,
-		Message: "Update Transaction success",
-		Status:  true,
-	})
+	// Return the transaction ticket
+	return c.JSON(http.StatusOK, transactionTicket)
 }
 
-func (t *transaksiController) DeleteController(c echo.Context) error {
-	id := c.Param("id")
+// func (t *transactionController) GetTransactionController(c gin.Context) error {
+// 	Transactions, err := t.Repository.GetTransactionService()
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
 
-	err := h.IsNumber(id)
-	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
-	}
+// 	return h.Response(c, http.StatusOK, h.ResponseModel{
+// 		Data:    Transactions,
+// 		Message: "Get all Transaction success",
+// 		Status:  true,
+// 	})
+// }
 
-	err = t.TransaksiS.DeleteService(id)
-	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
-	}
+// func (t *transaksiController) GetTransaksiController(c gin.Context) error {
+// 	id := c.Param("id")
 
-	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    nil,
-		Message: "Delete Transaction success",
-		Status:  true,
-	})
-}
+// 	err := h.IsNumber(id)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	var Transaksi *models.Transaksi
+
+// 	Transaksi, err = t.TransaksiS.GetTransaksiService(id)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusNotFound, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	return h.Response(c, http.StatusOK, h.ResponseModel{
+// 		Data:    Transaksi,
+// 		Message: "Get Transaction success",
+// 		Status:  true,
+// 	})
+// }
+
+// func (t *transaksiController) DeleteController(c echo.Context) error {
+// 	id := c.Param("id")
+
+// 	err := h.IsNumber(id)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	err = t.TransaksiS.DeleteService(id)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	return h.Response(c, http.StatusOK, h.ResponseModel{
+// 		Data:    nil,
+// 		Message: "Delete Transaction success",
+// 		Status:  true,
+// 	})
+// }

@@ -47,9 +47,9 @@ var (
 	promoS = s.NewPromoService(promoR)
 	promoC = c.NewPromoController(promoS)
 
-	transaksiR = r.NewTransaksiRepository(DB)
-	transaksiS = s.NewTransaksiService(transaksiR)
-	transaksiC = c.NewTransaksiController(transaksiS)
+	transactionR = r.TransactionRepository(DB)
+	transactionS = s.TransactionService(transactionR)
+	transaksiC = c.TransactionController(transactionS)
 
 )
 
