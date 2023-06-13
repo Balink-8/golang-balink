@@ -63,6 +63,8 @@ func New() *echo.Echo {
 
 	m.LoggerMiddleware(e)
 
+	e.Use(middleware.CORS())
+
 	auth := e.Group("")
 	auth.Use(middleware.JWT([]byte(os.Getenv("JWT_KEY"))))
 	auth.GET("/user", userC.GetUsersController)
