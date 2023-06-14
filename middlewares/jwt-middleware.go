@@ -2,15 +2,18 @@ package middlewares
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
 )
 
 type JWTS interface {
 	CreateJWTToken(id uint, name string) (string, error)
+	LogoutJWTToken(c echo.Context) error
 }
 
 type jwtS struct {
@@ -45,3 +48,16 @@ func (j *jwtS) CreateJWTToken(id uint, name string) (string, error) {
 
 	return token.SignedString([]byte(j.secretKey))
 }
+
+func (j jwtS) LogoutJWTToken(c echo.Context) error {
+	claims := jwt.MapClaims{
+		"exp": time.Now().Add(-1 * time.Hour).Unix(),
+		"iss": j.issuer,
+	}
+
+	_ = jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	return c.NoContent(http.StatusOK)
+}
+
+// butuh func buat reset jwt token

@@ -46,7 +46,6 @@ var (
 	promoR = r.NewPromoRepository(DB)
 	promoS = s.NewPromoService(promoR)
 	promoC = c.NewPromoController(promoS)
-
 )
 
 func New() *echo.Echo {
@@ -104,6 +103,8 @@ func New() *echo.Echo {
 	auth.PUT("/promo/:id", promoC.UpdateController)
 
 	e.POST("/login", userC.LoginController)
+	e.POST("/register", userC.RegisterController)
+	e.POST("/logout", userC.LogoutController)
 
 	auth.GET("/user/:id_user/keranjang", keranjangC.GetKeranjangByUserController)
 

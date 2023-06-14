@@ -18,17 +18,19 @@ type UserController interface {
 	UpdateController(c echo.Context) error
 	DeleteController(c echo.Context) error
 	LoginController(c echo.Context) error
+	RegisterController(c echo.Context) error
+	LogoutController(c echo.Context) error
 }
 
 type userController struct {
 	userS services.UserService
-	jwt m.JWTS
+	jwt   m.JWTS
 }
 
 func NewUserController(userS services.UserService, jwtS m.JWTS) UserController {
 	return &userController{
 		userS: userS,
-		jwt: jwtS,
+		jwt:   jwtS,
 	}
 }
 
@@ -42,7 +44,7 @@ func (u *userController) GetUsersController(c echo.Context) error {
 		})
 	}
 
-	for _,user := range users {
+	for _, user := range users {
 		user.Password = "-"
 	}
 
@@ -86,9 +88,9 @@ func (u *userController) GetUserController(c echo.Context) error {
 }
 
 func (u *userController) CreateController(c echo.Context) error {
-	var user models.CreateUser
+	var user models.User
 
-	err := c.Bind(&user.User)
+	err := c.Bind(&user)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -97,7 +99,7 @@ func (u *userController) CreateController(c echo.Context) error {
 		})
 	}
 
-	user.User, err = u.userS.CreateService(*user.User)
+	createdUser, err := u.userS.CreateService(user)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -106,7 +108,7 @@ func (u *userController) CreateController(c echo.Context) error {
 		})
 	}
 
-	token, err := u.jwt.CreateJWTToken(user.User.ID, user.User.Nama)
+	_, err = u.jwt.CreateJWTToken(createdUser.ID, createdUser.Nama)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -115,11 +117,8 @@ func (u *userController) CreateController(c echo.Context) error {
 		})
 	}
 
-	user.User.Password = "-"
-
-	user.Token = token
 	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    user,
+		Data:    createdUser,
 		Message: "Create user success",
 		Status:  true,
 	})
@@ -235,9 +234,9 @@ func (u *userController) LoginController(c echo.Context) error {
 }
 
 func (u *userController) RegisterController(c echo.Context) error {
-	var user models.CreateUser
+	var user models.User
 
-	err := c.Bind(&user.User)
+	err := c.Bind(&user)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -246,7 +245,7 @@ func (u *userController) RegisterController(c echo.Context) error {
 		})
 	}
 
-	user.User, err = u.userS.LoginService(*user.User)
+	createdUser, err := u.userS.CreateService(user)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -255,7 +254,7 @@ func (u *userController) RegisterController(c echo.Context) error {
 		})
 	}
 
-	token, err := u.jwt.CreateJWTToken(user.User.ID, user.User.Nama)
+	_, err = u.jwt.CreateJWTToken(createdUser.ID, createdUser.Nama)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -264,12 +263,25 @@ func (u *userController) RegisterController(c echo.Context) error {
 		})
 	}
 
-	user.User.Password = "-"
-
-	user.Token = token
 	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    user,
-		Message: "Login success",
+		Data:    createdUser,
+		Message: "Create user success",
 		Status:  true,
 	})
 }
+
+func (u *userController) LogoutController(c echo.Context) error {
+
+	err := u.jwt.LogoutJWTToken(c)
+	if err != nil {
+		return err
+	}
+
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    nil,
+		Message: "Logout success",
+		Status:  true,
+	})
+}
+
+//cara ngereset jwt token ?

@@ -8,7 +8,7 @@ import (
 type UserService interface {
 	GetUsersService() ([]*models.User, error)
 	GetUserService(id string) (*models.User, error)
-	CreateService(user models.User) (*models.User, error)
+	CreateService(user models.User) (res models.RegisterRespon, err error)
 	UpdateService(id string, userBody models.User) (*models.User, error)
 	DeleteService(id string) error
 	LoginService(login models.User) (*models.User, error)
@@ -43,13 +43,32 @@ func (u *userService) GetUserService(id string) (*models.User, error) {
 	return user, nil
 }
 
-func (u *userService) CreateService(user models.User) (*models.User, error) {
-	userR, err := u.userR.CreateRepository(user)
+func (u *userService) GetUserByEmailService(email string) (*models.User, error) {
+	user, err := u.userR.GetUserByEmailRepository(email)
 	if err != nil {
 		return nil, err
 	}
 
-	return userR, nil
+	return user, nil
+}
+
+func (u *userService) CreateService(user models.User) (res models.RegisterRespon, err error) {
+	userR, err := u.userR.CreateRepository(user)
+	if err != nil {
+		return res, err
+	}
+
+	RegisterRespon := models.RegisterRespon{
+		ID:           userR.ID,
+		Nama:         userR.Nama,
+		Foto_Profile: userR.Foto_Profile,
+		Email:        userR.Email,
+		Password:     userR.Password,
+		No_Telepon:   userR.No_Telepon,
+		Alamat:       userR.Alamat,
+	}
+
+	return RegisterRespon, nil
 }
 
 func (u *userService) UpdateService(id string, userBody models.User) (*models.User, error) {
@@ -80,10 +99,11 @@ func (u *userService) LoginService(login models.User) (*models.User, error) {
 }
 
 func (u *userService) RegisterService(register models.User) (*models.User, error) {
-	RegisterR, err := u.userR.RegisterRepository(register)
+	_, err := u.userR.GetUserByEmailRepository(register.Email)
 	if err != nil {
-		return nil, err
+		reg, _ := u.userR.CreateRepository(register)
+		return reg, nil
 	}
 
-	return RegisterR, nil
+	return nil, err
 }
