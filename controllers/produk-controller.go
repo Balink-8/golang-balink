@@ -41,8 +41,9 @@ func (p *produkController) GetProduksController(c echo.Context) error {
 	}
 
 	order := c.QueryParam("order")
+	search := c.QueryParam("search")
 
-	Produks, totalData, err := p.ProdukS.GetProduksService(page, limit, order)
+	Produks, totalData, err := p.ProdukS.GetProduksService(page, limit, order, search)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,

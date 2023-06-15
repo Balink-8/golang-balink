@@ -7,7 +7,7 @@ import (
 )
 
 type PromoRepository interface {
-	GetPromosRepository(page int, limit int, order string) ([]*models.Promo, int, error)
+	GetPromosRepository(page int, limit int, order string, search string) ([]*models.Promo, int, error)
 	GetPromoRepository(id string) (*models.Promo, error)
 	CreateRepository(Promo models.Promo) (*models.Promo, error)
 	UpdateRepository(id string, PromoBody models.Promo) (*models.Promo, error)
@@ -24,16 +24,22 @@ func NewPromoRepository(DB *gorm.DB) PromoRepository {
 	}
 }
 
-func (p *promoRepository) GetPromosRepository(page int, limit int, order string) ([]*models.Promo, int, error) {
+func (p *promoRepository) GetPromosRepository(page int, limit int, order string, search string) ([]*models.Promo, int, error) {
 	var Promos []*models.Promo
 	var totalData int64
 
-	if err := p.DB.Model(&models.Promo{}).Count(&totalData).Error; err != nil {
+	query := p.DB.Model(&models.Promo{})
+
+	if search != "" {
+		query = query.Where("judul LIKE ?", "%"+search+"%")
+	}
+
+	if err := query.Count(&totalData).Error; err != nil {
 		return nil, 0, err
 	}
 
 	offset := (page - 1) * limit
-	query := p.DB.Offset(offset).Limit(limit)
+	query = query.Offset(offset).Limit(limit)
 
 	switch order {
 	case "asc":
@@ -73,11 +79,13 @@ func (p *promoRepository) UpdateRepository(id string, PromoBody models.Promo) (*
 		return nil, err
 	}
 
-	err = p.DB.Where("ID = ?", id).Updates(models.Promo{Kode: PromoBody.Kode, PotonganHarga: PromoBody.PotonganHarga}).Error
+	err = p.DB.Where("ID = ?", id).Updates(models.Promo{Nama: PromoBody.Nama, Deskripsi: PromoBody.Deskripsi, Kode: PromoBody.Kode, PotonganHarga: PromoBody.PotonganHarga}).Error
 	if err != nil {
 		return nil, err
 	}
 
+	Promo.Nama = PromoBody.Nama
+	Promo.Deskripsi = PromoBody.Deskripsi
 	Promo.Kode = PromoBody.Kode
 	Promo.PotonganHarga = PromoBody.PotonganHarga
 

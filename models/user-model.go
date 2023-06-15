@@ -10,7 +10,6 @@ type User struct {
 	Password 		string `json:"password" form:"password"`
 	No_Telepon 	 	string `json:"no_telepon" form:"no_telepon"`
 	Alamat 	 		string `json:"alamat" form:"alamat"`
-	Role	 		string `json:"role" form:"role"`
 }
 
 type CreateUser struct {

@@ -7,7 +7,7 @@ import (
 )
 
 type KategoriProdukRepository interface {
-	GetKategoriProduksRepository(page int, limit int, order string) ([]*models.KategoriProduk, int, error)
+	GetKategoriProduksRepository(page int, limit int, order string, search string) ([]*models.KategoriProduk, int, error)
 	GetKategoriProdukRepository(id string) (*models.KategoriProduk, error)
 	CreateRepository(KategoriProduk models.KategoriProduk) (*models.KategoriProduk, error)
 	UpdateRepository(id string, KategoriProdukBody models.KategoriProduk) (*models.KategoriProduk, error)
@@ -24,16 +24,22 @@ func NewKategoriProdukRepository(DB *gorm.DB) KategoriProdukRepository {
 	}
 }
 
-func (k *kategoriProdukRepository) GetKategoriProduksRepository(page int, limit int, order string) ([]*models.KategoriProduk, int, error) {
+func (k *kategoriProdukRepository) GetKategoriProduksRepository(page int, limit int, order string, search string) ([]*models.KategoriProduk, int, error) {
 	var KategoriProduks []*models.KategoriProduk
 	var totalData int64
 
-	if err := k.DB.Model(&models.KategoriProduk{}).Count(&totalData).Error; err != nil {
+	query := k.DB.Model(&models.KategoriProduk{})
+
+	if search != "" {
+		query = query.Where("judul LIKE ?", "%"+search+"%")
+	}
+
+	if err := query.Count(&totalData).Error; err != nil {
 		return nil, 0, err
 	}
 
 	offset := (page - 1) * limit
-	query := k.DB.Offset(offset).Limit(limit)
+	query = query.Offset(offset).Limit(limit)
 
 	switch order {
 	case "asc":
@@ -73,12 +79,13 @@ func (k *kategoriProdukRepository) UpdateRepository(id string, KategoriProdukBod
 		return nil, err
 	}
 
-	err = k.DB.Where("ID = ?", id).Updates(models.KategoriProduk{Nama: KategoriProdukBody.Nama}).Error
+	err = k.DB.Where("ID = ?", id).Updates(models.KategoriProduk{Nama: KategoriProdukBody.Nama, Deskripsi: KategoriProdukBody.Deskripsi}).Error
 	if err != nil {
 		return nil, err
 	}
 
 	KategoriProduk.Nama = KategoriProdukBody.Nama
+	KategoriProduk.Deskripsi = KategoriProdukBody.Deskripsi
 
 	return KategoriProduk, nil
 }

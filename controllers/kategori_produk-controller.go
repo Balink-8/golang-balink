@@ -41,8 +41,9 @@ func (k *kategoriProdukController) GetKategoriProduksController(c echo.Context) 
 	}
 
 	order := c.QueryParam("order")
+	search := c.QueryParam("search")
 
-	KategoriProduks, totalData, err := k.KategoriProdukS.GetKategoriProduksService(page, limit, order)
+	KategoriProduks, totalData, err := k.KategoriProdukS.GetKategoriProduksService(page, limit, order, search)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -60,7 +61,7 @@ func (k *kategoriProdukController) GetKategoriProduksController(c echo.Context) 
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    responseData,
-		Message: "Get all KategoriProduk success",
+		Message: "Get all Kategori Produk success",
 		Status:  true,
 	})
 }

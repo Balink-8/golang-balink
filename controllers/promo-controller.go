@@ -41,8 +41,9 @@ func (p *promoController) GetPromosController(c echo.Context) error {
 	}
 
 	order := c.QueryParam("order")
+	search := c.QueryParam("search")
 
-	Promos, totalData, err := p.PromoS.GetPromosService(page, limit, order)
+	Promos, totalData, err := p.PromoS.GetPromosService(page, limit, order, search)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,

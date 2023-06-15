@@ -7,7 +7,7 @@ import (
 )
 
 type EventRepository interface {
-	GetEventsRepository(page int, limit int, order string) ([]*models.Event, int, error)
+	GetEventsRepository(page int, limit int, order string, search string) ([]*models.Event, int, error)
 	GetEventRepository(id string) (*models.Event, error)
 	CreateRepository(Event models.Event) (*models.Event, error)
 	UpdateRepository(id string, EventBody models.Event) (*models.Event, error)
@@ -24,16 +24,22 @@ func NewEventRepository(DB *gorm.DB) EventRepository {
 	}
 }
 
-func (e *eventRepository) GetEventsRepository(page int, limit int, order string) ([]*models.Event, int, error) {
+func (e *eventRepository) GetEventsRepository(page int, limit int, order string, search string) ([]*models.Event, int, error) {
 	var Events []*models.Event
 	var totalData int64
 
-	if err := e.DB.Model(&models.Event{}).Count(&totalData).Error; err != nil {
+	query := e.DB.Model(&models.Event{})
+
+	if search != "" {
+		query = query.Where("judul LIKE ?", "%"+search+"%")
+	}
+
+	if err := query.Count(&totalData).Error; err != nil {
 		return nil, 0, err
 	}
 
 	offset := (page - 1) * limit
-	query := e.DB.Offset(offset).Limit(limit)
+	query = query.Offset(offset).Limit(limit)
 
 	switch order {
 	case "asc":
