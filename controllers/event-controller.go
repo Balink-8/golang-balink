@@ -41,8 +41,9 @@ func (e *eventController) GetEventsController(c echo.Context) error {
 	}
 
 	order := c.QueryParam("order")
+	search := c.QueryParam("search")
 
-	Events, totalData, err := e.EventS.GetEventsService(page, limit, order)
+	Events, totalData, err := e.EventS.GetEventsService(page, limit, order, search)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,

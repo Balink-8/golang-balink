@@ -41,8 +41,9 @@ func (a *artikelController) GetArtikelsController(c echo.Context) error {
 	}
 
 	order := c.QueryParam("order")
+	search := c.QueryParam("search")
 
-	Artikels, totalData, err := a.ArtikelS.GetArtikelsService(page, limit, order)
+	Artikels, totalData, err := a.ArtikelS.GetArtikelsService(page, limit, order, search)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -64,7 +65,6 @@ func (a *artikelController) GetArtikelsController(c echo.Context) error {
 		Status:  true,
 	})
 }
-
 
 func (a *artikelController) GetArtikelController(c echo.Context) error {
 	id := c.Param("id")

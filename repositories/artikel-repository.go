@@ -7,7 +7,7 @@ import (
 )
 
 type ArtikelRepository interface {
-	GetArtikelsRepository(page int, limit int, order string) ([]*models.Artikel, int, error)
+	GetArtikelsRepository(page int, limit int, order string, search string) ([]*models.Artikel, int, error)
 	GetArtikelRepository(id string) (*models.Artikel, error)
 	CreateRepository(Artikel models.Artikel) (*models.Artikel, error)
 	UpdateRepository(id string, ArtikelBody models.Artikel) (*models.Artikel, error)
@@ -24,16 +24,22 @@ func NewArtikelRepository(DB *gorm.DB) ArtikelRepository {
 	}
 }
 
-func (a *artikelRepository) GetArtikelsRepository(page int, limit int, order string) ([]*models.Artikel, int, error) {
+func (a *artikelRepository) GetArtikelsRepository(page int, limit int, order string, search string) ([]*models.Artikel, int, error) {
 	var Artikels []*models.Artikel
 	var totalData int64
 
-	if err := a.DB.Model(&models.Artikel{}).Count(&totalData).Error; err != nil {
+	query := a.DB.Model(&models.Artikel{})
+
+	if search != "" {
+		query = query.Where("judul LIKE ?", "%"+search+"%")
+	}
+
+	if err := query.Count(&totalData).Error; err != nil {
 		return nil, 0, err
 	}
 
 	offset := (page - 1) * limit
-	query := a.DB.Offset(offset).Limit(limit)
+	query = query.Offset(offset).Limit(limit)
 
 	switch order {
 	case "asc":
@@ -48,7 +54,6 @@ func (a *artikelRepository) GetArtikelsRepository(page int, limit int, order str
 
 	return Artikels, int(totalData), nil
 }
-
 
 func (a *artikelRepository) GetArtikelRepository(id string) (*models.Artikel, error) {
 	var Artikel *models.Artikel
@@ -74,14 +79,14 @@ func (a *artikelRepository) UpdateRepository(id string, ArtikelBody models.Artik
 		return nil, err
 	}
 
-	err = a.DB.Where("ID = ?", id).Updates(models.Artikel{Gambar: ArtikelBody.Gambar, Judul: ArtikelBody.Judul, Isi: ArtikelBody.Isi}).Error
+	err = a.DB.Where("ID = ?", id).Updates(models.Artikel{Gambar: ArtikelBody.Gambar, Judul: ArtikelBody.Judul, Deskripsi: ArtikelBody.Deskripsi}).Error
 	if err != nil {
 		return nil, err
 	}
 
 	Artikel.Gambar = ArtikelBody.Gambar
 	Artikel.Judul = ArtikelBody.Judul
-	Artikel.Isi = ArtikelBody.Isi
+	Artikel.Deskripsi = ArtikelBody.Deskripsi
 
 	return Artikel, nil
 }

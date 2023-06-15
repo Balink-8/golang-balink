@@ -6,7 +6,7 @@ import (
 )
 
 type PromoService interface {
-	GetPromosService(page int, limit int, order string) ([]*models.Promo, int, error)
+	GetPromosService(page int, limit int, order string, search string) ([]*models.Promo, int, error)
 	GetPromoService(id string) (*models.Promo, error)
 	CreateService(Promo models.Promo) (*models.Promo, error)
 	UpdateService(id string, PromoBody models.Promo) (*models.Promo, error)
@@ -23,8 +23,8 @@ func NewPromoService(PromoR repositories.PromoRepository) PromoService {
 	}
 }
 
-func (p *promoService) GetPromosService(page int, limit int, order string) ([]*models.Promo, int, error) {
-	Promos, totalData, err := p.PromoR.GetPromosRepository(page, limit, order)
+func (p *promoService) GetPromosService(page int, limit int, order string, search string) ([]*models.Promo, int, error) {
+	Promos, totalData, err := p.PromoR.GetPromosRepository(page, limit, order, search)
 	if err != nil {
 		return nil, 0, err
 	}

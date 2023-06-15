@@ -23,6 +23,10 @@ var (
 	userS = s.NewUserService(userR)
 	userC = c.NewUserController(userS, JWT)
 
+	profilePerusahaanR = r.NewProfilePerusahaanRepository(DB)
+	profilePerusahaanS = s.NewProfilePerusahaanService(profilePerusahaanR)
+	profilePerusahaanC = c.NewProfilePerusahaanController(profilePerusahaanS, JWT)
+
 	produkR = r.NewProdukRepository(DB)
 	produkS = s.NewProdukService(produkR)
 	produkC = c.NewProdukController(produkS)
@@ -47,10 +51,6 @@ var (
 	promoS = s.NewPromoService(promoR)
 	promoC = c.NewPromoController(promoS)
 
-	masalahR = r.NewMasalahRepository(DB)
-	masalahS = s.NewMasalahService(masalahR)
-	masalahC = c.NewMasalahController(masalahS)
-
 )
 
 func New() *echo.Echo {
@@ -69,12 +69,14 @@ func New() *echo.Echo {
 	auth.Use(middleware.JWT([]byte(os.Getenv("JWT_KEY"))))
 	auth.GET("/user", userC.GetUsersController)
 	auth.GET("/user/:id", userC.GetUserController)
-	e.POST("/user", userC.CreateController)
+	e.POST("/user_register", userC.CreateController)
 	auth.DELETE("/user/:id", userC.DeleteController)
-	auth.PUT("/user/:id", userC.UpdateUserController)
+	auth.PUT("/user/:id", userC.UpdateController)
+	e.POST("/user_login", userC.LoginController)
 
-	auth.GET("/admin", userC.GetAdminController)
-	auth.PUT("/admin", userC.UpdateAdminController)
+	auth.GET("/admin", profilePerusahaanC.GetProfilePerusahaanController)
+	auth.PUT("/admin", profilePerusahaanC.UpdateController)
+	e.POST("/admin_login", profilePerusahaanC.LoginController)
 
 	auth.GET("/produk", produkC.GetProduksController)
 	auth.GET("/produk/:id", produkC.GetProdukController)
@@ -111,12 +113,6 @@ func New() *echo.Echo {
 	auth.POST("/promo", promoC.CreateController)
 	auth.DELETE("/promo/:id", promoC.DeleteController)
 	auth.PUT("/promo/:id", promoC.UpdateController)
-
-	auth.GET("/masalah", masalahC.GetMasalahsController)
-	auth.GET("/masalah/:id", masalahC.GetMasalahController)
-	auth.POST("/masalah", masalahC.CreateController)
-
-	e.POST("/login", userC.LoginController)
 
 	auth.GET("/user/:id_user/keranjang", keranjangC.GetKeranjangByUserController)
 
