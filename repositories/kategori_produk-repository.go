@@ -31,7 +31,7 @@ func (k *kategoriProdukRepository) GetKategoriProduksRepository(page int, limit 
 	query := k.DB.Model(&models.KategoriProduk{})
 
 	if search != "" {
-		query = query.Where("judul LIKE ?", "%"+search+"%")
+		query = query.Where("nama LIKE ?", "%"+search+"%")
 	}
 
 	if err := query.Count(&totalData).Error; err != nil {

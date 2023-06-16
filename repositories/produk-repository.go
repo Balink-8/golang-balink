@@ -31,7 +31,7 @@ func (p *produkRepository) GetProduksRepository(page int, limit int, order strin
 	query := p.DB.Model(&models.Produk{})
 
 	if search != "" {
-		query = query.Where("judul LIKE ?", "%"+search+"%")
+		query = query.Where("nama LIKE ?", "%"+search+"%")
 	}
 
 	if err := query.Count(&totalData).Error; err != nil {
