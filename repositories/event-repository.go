@@ -31,7 +31,7 @@ func (e *eventRepository) GetEventsRepository(page int, limit int, order string,
 	query := e.DB.Model(&models.Event{})
 
 	if search != "" {
-		query = query.Where("judul LIKE ?", "%"+search+"%")
+		query = query.Where("nama LIKE ?", "%"+search+"%")
 	}
 
 	if err := query.Count(&totalData).Error; err != nil {

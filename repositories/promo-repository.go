@@ -31,7 +31,7 @@ func (p *promoRepository) GetPromosRepository(page int, limit int, order string,
 	query := p.DB.Model(&models.Promo{})
 
 	if search != "" {
-		query = query.Where("judul LIKE ?", "%"+search+"%")
+		query = query.Where("nama LIKE ?", "%"+search+"%")
 	}
 
 	if err := query.Count(&totalData).Error; err != nil {

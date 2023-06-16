@@ -32,7 +32,7 @@ func (u *userRepository) GetUsersRepository(page int, limit int, order string, s
 	query := u.DB.Model(&models.User{})
 
 	if search != "" {
-		query = query.Where("judul LIKE ?", "%"+search+"%")
+		query = query.Where("nama LIKE ?", "%"+search+"%")
 	}
 
 	if err := query.Count(&totalData).Error; err != nil {
