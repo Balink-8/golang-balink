@@ -47,10 +47,17 @@ var (
 	promoS = s.NewPromoService(promoR)
 	promoC = c.NewPromoController(promoS)
 
-	transactionR = r.TransactionRepository(DB)
-	transactionS = s.TransactionService(transactionR)
-	transaksiC = c.TransactionController(transactionS)
+	// masalahR = r.NewMasalahRepository(DB)
+	// masalahS = s.NewMasalahService(masalahR)
+	// masalahC = c.NewMasalahController(masalahS)
 
+	transaksiEventR = r.NewTransaksiEventRepository(DB)
+	transaksiEventS = s.NewTransaksiEventServices(transaksiEventR, keranjangR, produkR)
+	transaksiEventC = c.NewTransaksiEventController(transaksiEventS)
+
+	transaksiProdukR = r.NewTransaksiProdukRepository(DB)
+	transaksiProdukS = s.NewTransaksiProdukServices(transaksiProdukR, keranjangR, produkR)
+	transaksiProdukC = c.NewTransaksiProdukController(transaksiProdukS)
 )
 
 func New() *echo.Echo {
@@ -69,7 +76,10 @@ func New() *echo.Echo {
 	auth.GET("/user/:id", userC.GetUserController)
 	e.POST("/user", userC.CreateController)
 	auth.DELETE("/user/:id", userC.DeleteController)
-	auth.PUT("/user/:id", userC.UpdateController)
+	// auth.PUT("/user/:id", userC.UpdateUserController)
+
+	// auth.GET("/admin", userC.GetAdminController)
+	// auth.PUT("/admin", userC.UpdateAdminController)
 
 	auth.GET("/produk", produkC.GetProduksController)
 	auth.GET("/produk/:id", produkC.GetProdukController)
@@ -107,15 +117,25 @@ func New() *echo.Echo {
 	auth.DELETE("/promo/:id", promoC.DeleteController)
 	auth.PUT("/promo/:id", promoC.UpdateController)
 
-	auth.GET("/transaksi", transaksiC.GetTransaksisController)
-	auth.GET("/transaksi/:id", transaksiC.GetTransaksiController)
-	auth.POST("/transaksi", transaksiC.CreateController)
-	auth.DELETE("/transaksi/:id", transaksiC.DeleteController)
-	auth.PUT("/transaksi/:id", transaksiC.UpdateController)
+	// auth.GET("/masalah", masalahC.GetMasalahsController)
+	// auth.GET("/masalah/:id", masalahC.GetMasalahController)
+	// auth.POST("/masalah", masalahC.CreateController)
 
 	e.POST("/login", userC.LoginController)
 
 	auth.GET("/user/:id_user/keranjang", keranjangC.GetKeranjangByUserController)
+
+	// get transaksi event dan produk sukses lainnya masih eror
+	auth.GET("transaksi_event", transaksiEventC.GetTransaksiEventsController)
+	auth.GET("transaksi_event/:id", transaksiEventC.GetTransaksiEventController)
+	auth.POST("transaksi_event", transaksiEventC.CreateTransaksiEventController)
+	auth.GET("user/:id_user/transaksi_event", transaksiEventC.GetTransaksiEventByUserController)
+
+	auth.GET("transaksi_produk", transaksiProdukC.GetTransaksiProduksController)
+	auth.GET("transaksi_produk/:id", transaksiProdukC.GetTransaksiProdukController)
+	auth.POST("transaksi_produk", transaksiProdukC.CreateTransaksiProdukController)
+	auth.DELETE("transaksi_produk/:id", transaksiProdukC.DeleteTransaksiProdukController)
+	auth.GET("user/:id_user/transaksi_produk", transaksiProdukC.GetTransaksiProdukByUserController)
 
 	return e
 }
