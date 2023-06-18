@@ -51,6 +51,10 @@ var (
 	promoS = s.NewPromoService(promoR)
 	promoC = c.NewPromoController(promoS)
 
+	dashboardR = r.NewDashboardRepository(DB)
+	dashboardS = s.NewDashboardService(dashboardR)
+	dashboardC = c.NewDashboardController(dashboardS)
+
 )
 
 func New() *echo.Echo {
@@ -115,6 +119,8 @@ func New() *echo.Echo {
 	auth.PUT("/promo/:id", promoC.UpdateController)
 
 	auth.GET("/user/:id_user/keranjang", keranjangC.GetKeranjangByUserController)
+
+	auth.GET("/web_dashboard", dashboardC.GetDashboardController)
 
 	return e
 }
