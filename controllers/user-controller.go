@@ -2,11 +2,11 @@ package controllers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 
 	h "capstone/helpers"
+	"capstone/middlewares"
 	m "capstone/middlewares"
 	"capstone/models"
 	"capstone/services"
@@ -19,35 +19,24 @@ type UserController interface {
 	UpdateController(c echo.Context) error
 	DeleteController(c echo.Context) error
 	LoginController(c echo.Context) error
+	RegisterController(c echo.Context) error
+	LogoutController(c echo.Context) error
 }
 
 type userController struct {
-	UserS services.UserService
-	jwt m.JWTS
+	userS services.UserService
+	jwt   m.JWTS
 }
 
-func NewUserController(UserS services.UserService, jwtS m.JWTS) UserController {
+func NewUserController(userS services.UserService, jwtS m.JWTS) UserController {
 	return &userController{
-		UserS: UserS,
-		jwt: jwtS,
+		userS: userS,
+		jwt:   jwtS,
 	}
 }
 
 func (u *userController) GetUsersController(c echo.Context) error {
-	page, err := strconv.Atoi(c.QueryParam("page"))
-	if err != nil || page < 1 {
-		page = 1
-	}
-
-	limit, err := strconv.Atoi(c.QueryParam("limit"))
-	if err != nil || limit < 1 {
-		limit = 10
-	}
-
-	order := c.QueryParam("order")
-	search := c.QueryParam("search")
-
-	Users, totalData, err := u.UserS.GetUsersService(page, limit, order, search)
+	users, err := u.userS.GetUsersService()
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -56,16 +45,13 @@ func (u *userController) GetUsersController(c echo.Context) error {
 		})
 	}
 
-	responseData := map[string]interface{}{
-		"data":       Users,
-		"page":       page,
-		"data_shown": len(Users),
-		"total_data": totalData,
+	for _, user := range users {
+		user.Password = "-"
 	}
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    responseData,
-		Message: "Get all User success",
+		Data:    users,
+		Message: "Get all users success",
 		Status:  true,
 	})
 }
@@ -84,7 +70,7 @@ func (u *userController) GetUserController(c echo.Context) error {
 
 	var user *models.User
 
-	user, err = u.UserS.GetUserService(id)
+	user, err = u.userS.GetUserService(id)
 	if err != nil {
 		return h.Response(c, http.StatusNotFound, h.ResponseModel{
 			Data:    nil,
@@ -92,6 +78,8 @@ func (u *userController) GetUserController(c echo.Context) error {
 			Status:  false,
 		})
 	}
+
+	user.Password = "-"
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    user,
@@ -101,9 +89,9 @@ func (u *userController) GetUserController(c echo.Context) error {
 }
 
 func (u *userController) CreateController(c echo.Context) error {
-	var user models.CreateUser
+	var user models.User
 
-	err := c.Bind(&user.User)
+	err := c.Bind(&user)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -112,7 +100,7 @@ func (u *userController) CreateController(c echo.Context) error {
 		})
 	}
 
-	user.User, err = u.UserS.CreateService(*user.User)
+	createdUser, err := u.userS.CreateService(user)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -121,7 +109,7 @@ func (u *userController) CreateController(c echo.Context) error {
 		})
 	}
 
-	token, err := u.jwt.CreateJWTToken(user.User.ID, user.User.Nama)
+	_, err = u.jwt.CreateJWTToken(createdUser.ID, createdUser.Nama)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -130,9 +118,8 @@ func (u *userController) CreateController(c echo.Context) error {
 		})
 	}
 
-	user.Token = token
 	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    user,
+		Data:    createdUser,
 		Message: "Create user success",
 		Status:  true,
 	})
@@ -161,7 +148,7 @@ func (u *userController) UpdateController(c echo.Context) error {
 		})
 	}
 
-	user, err = u.UserS.UpdateService(id, *user)
+	user, err = u.userS.UpdateService(id, *user)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -169,6 +156,8 @@ func (u *userController) UpdateController(c echo.Context) error {
 			Status:  false,
 		})
 	}
+
+	user.Password = "-"
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    user,
@@ -189,7 +178,7 @@ func (u *userController) DeleteController(c echo.Context) error {
 		})
 	}
 
-	err = u.UserS.DeleteService(id)
+	err = u.userS.DeleteService(id)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -217,7 +206,7 @@ func (u *userController) LoginController(c echo.Context) error {
 		})
 	}
 
-	user.User, err = u.UserS.LoginService(*user.User)
+	user.User, err = u.userS.LoginService(*user.User)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -235,10 +224,67 @@ func (u *userController) LoginController(c echo.Context) error {
 		})
 	}
 
+	user.User.Password = "-"
+
 	user.Token = token
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    user,
 		Message: "Login success",
+		Status:  true,
+	})
+}
+
+func (u *userController) RegisterController(c echo.Context) error {
+	var user models.User
+
+	err := c.Bind(&user)
+	if err != nil {
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
+	}
+
+	createdUser, err := u.userS.CreateService(user)
+	if err != nil {
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
+	}
+
+	_, err = u.jwt.CreateJWTToken(createdUser.ID, createdUser.Nama)
+	if err != nil {
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
+	}
+
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    createdUser,
+		Message: "Create user success",
+		Status:  true,
+	})
+}
+
+func (u *userController) LogoutController(c echo.Context) error {
+	_, err := middlewares.IsUser(c)
+	if err != nil {
+		return err
+	}
+
+	err = u.jwt.LogoutJWTToken(c)
+	if err != nil {
+		return err
+	}
+
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    nil,
+		Message: "Logout success",
 		Status:  true,
 	})
 }

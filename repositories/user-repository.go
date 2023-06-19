@@ -7,12 +7,13 @@ import (
 )
 
 type UserRepository interface {
-	GetUsersRepository(page int, limit int, order string, search string) ([]*models.User, int, error)
+	GetUsersRepository() ([]*models.User, error)
 	GetUserRepository(id string) (*models.User, error)
 	CreateRepository(user models.User) (*models.User, error)
 	UpdateRepository(id string, userBody models.User) (*models.User, error)
 	DeleteRepository(id string) error
 	LoginRepository(login models.User) (*models.User, error)
+	GetUserByEmailRepository(email string) (*models.User, error)
 }
 
 type userRepository struct {
@@ -25,41 +26,30 @@ func NewUserRepository(DB *gorm.DB) UserRepository {
 	}
 }
 
-func (u *userRepository) GetUsersRepository(page int, limit int, order string, search string) ([]*models.User, int, error) {
-	var Users []*models.User
-	var totalData int64
+func (u *userRepository) GetUsersRepository() ([]*models.User, error) {
+	var users []*models.User
 
-	query := u.DB.Model(&models.User{})
-
-	if search != "" {
-		query = query.Where("judul LIKE ?", "%"+search+"%")
+	if err := u.DB.Find(&users).Error; err != nil {
+		return nil, err
 	}
 
-	if err := query.Count(&totalData).Error; err != nil {
-		return nil, 0, err
-	}
-
-	offset := (page - 1) * limit
-	query = query.Offset(offset).Limit(limit)
-
-	switch order {
-	case "asc":
-		query = query.Order("ID ASC")
-	case "desc":
-		query = query.Order("ID DESC")
-	}
-
-	if err := query.Find(&Users).Error; err != nil {
-		return nil, 0, err
-	}
-
-	return Users, int(totalData), nil
+	return users, nil
 }
 
 func (u *userRepository) GetUserRepository(id string) (*models.User, error) {
 	var user models.User
 
 	if err := u.DB.Where("ID = ?", id).Take(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (u *userRepository) GetUserByEmailRepository(email string) (*models.User, error) {
+	var user models.User
+
+	if err := u.DB.Where("email = ?", email).First(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -80,7 +70,7 @@ func (u *userRepository) UpdateRepository(id string, userBody models.User) (*mod
 		return nil, err
 	}
 
-	err = u.DB.Where("ID = ?", id).Updates(models.User{Nama: userBody.Nama, Foto_Profile: userBody.Foto_Profile, Email: userBody.Email, Password: userBody.Password, No_Telepon: userBody.No_Telepon, Alamat: userBody.Alamat}).Error
+	err = u.DB.Where("ID = ?", id).Updates(models.User{Nama: userBody.Nama, Foto_Profile: userBody.Foto_Profile, Email: userBody.Email, Password: userBody.Password, No_Telepon: userBody.No_Telepon, Alamat: userBody.Alamat, Role: userBody.Role}).Error
 	if err != nil {
 		return nil, err
 	}
@@ -91,6 +81,7 @@ func (u *userRepository) UpdateRepository(id string, userBody models.User) (*mod
 	user.Password = userBody.Password
 	user.No_Telepon = userBody.No_Telepon
 	user.Alamat = userBody.Alamat
+	user.Role = userBody.Role
 
 	return user, nil
 }

@@ -47,10 +47,13 @@ var (
 	kategoriProdukS = s.NewKategoriProdukService(kategoriProdukR)
 	kategoriProdukC = c.NewKategoriProdukController(kategoriProdukS)
 
+	dashboardR = r.NewDashboardRepository(DB)
+	dashboardS = s.NewDashboardServices(dashboardR)
+	dashboardC = c.NewDashboardController(dashboardS)
+
 	promoR = r.NewPromoRepository(DB)
 	promoS = s.NewPromoService(promoR)
 	promoC = c.NewPromoController(promoS)
-
 )
 
 func New() *echo.Echo {
@@ -64,6 +67,8 @@ func New() *echo.Echo {
 	m.LoggerMiddleware(e)
 
 	e.Use(middleware.CORS())
+
+	e.GET("/dashboard", dashboardC.DashboardGetAll)
 
 	auth := e.Group("")
 	auth.Use(middleware.JWT([]byte(os.Getenv("JWT_KEY"))))
@@ -113,6 +118,10 @@ func New() *echo.Echo {
 	auth.POST("/promo", promoC.CreateController)
 	auth.DELETE("/promo/:id", promoC.DeleteController)
 	auth.PUT("/promo/:id", promoC.UpdateController)
+
+	e.POST("/login", userC.LoginController)
+	e.POST("/register", userC.RegisterController)
+	e.GET("/logout", userC.LogoutController)
 
 	auth.GET("/user/:id_user/keranjang", keranjangC.GetKeranjangByUserController)
 
