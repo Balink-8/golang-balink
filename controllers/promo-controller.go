@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 
@@ -29,7 +30,20 @@ func NewPromoController(PromoS services.PromoService) PromoController {
 }
 
 func (p *promoController) GetPromosController(c echo.Context) error {
-	Promos, err := p.PromoS.GetPromosService()
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+
+	order := c.QueryParam("order")
+	search := c.QueryParam("search")
+
+	Promos, totalData, err := p.PromoS.GetPromosService(page, limit, order, search)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -38,9 +52,16 @@ func (p *promoController) GetPromosController(c echo.Context) error {
 		})
 	}
 
+	responseData := map[string]interface{}{
+		"data":       Promos,
+		"page":       page,
+		"data_shown": len(Promos),
+		"total_data": totalData,
+	}
+
 	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    Promos,
-		Message: "Get all Promos success",
+		Data:    responseData,
+		Message: "Get all Promo success",
 		Status:  true,
 	})
 }

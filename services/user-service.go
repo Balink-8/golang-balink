@@ -6,7 +6,7 @@ import (
 )
 
 type UserService interface {
-	GetUsersService() ([]*models.User, error)
+	GetUsersService(page int, limit int, order string, search string) ([]*models.User, int, error)
 	GetUserService(id string) (*models.User, error)
 	CreateService(user models.User) (*models.User, error)
 	UpdateService(id string, userBody models.User) (*models.User, error)
@@ -15,26 +15,26 @@ type UserService interface {
 }
 
 type userService struct {
-	userR repositories.UserRepository
+	UserR repositories.UserRepository
 }
 
-func NewUserService(userR repositories.UserRepository) UserService {
+func NewUserService(UserR repositories.UserRepository) UserService {
 	return &userService{
-		userR: userR,
+		UserR: UserR,
 	}
 }
 
-func (u *userService) GetUsersService() ([]*models.User, error) {
-	users, err := u.userR.GetUsersRepository()
+func (u *userService) GetUsersService(page int, limit int, order string, search string) ([]*models.User, int, error) {
+	Users, totalData, err := u.UserR.GetUsersRepository(page, limit, order, search)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return users, nil
+	return Users, totalData, nil
 }
 
 func (u *userService) GetUserService(id string) (*models.User, error) {
-	user, err := u.userR.GetUserRepository(id)
+	user, err := u.UserR.GetUserRepository(id)
 	if err != nil {
 		return nil, err
 	}
@@ -43,16 +43,16 @@ func (u *userService) GetUserService(id string) (*models.User, error) {
 }
 
 func (u *userService) CreateService(user models.User) (*models.User, error) {
-	userR, err := u.userR.CreateRepository(user)
+	UserR, err := u.UserR.CreateRepository(user)
 	if err != nil {
 		return nil, err
 	}
 
-	return userR, nil
+	return UserR, nil
 }
 
 func (u *userService) UpdateService(id string, userBody models.User) (*models.User, error) {
-	user, err := u.userR.UpdateRepository(id, userBody)
+	user, err := u.UserR.UpdateRepository(id, userBody)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (u *userService) UpdateService(id string, userBody models.User) (*models.Us
 }
 
 func (u *userService) DeleteService(id string) error {
-	err := u.userR.DeleteRepository(id)
+	err := u.UserR.DeleteRepository(id)
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func (u *userService) DeleteService(id string) error {
 }
 
 func (u *userService) LoginService(login models.User) (*models.User, error) {
-	loginR, err := u.userR.LoginRepository(login)
+	loginR, err := u.UserR.LoginRepository(login)
 	if err != nil {
 		return nil, err
 	}

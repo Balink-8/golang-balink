@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 
@@ -29,7 +30,20 @@ func NewEventController(EventS services.EventService) EventController {
 }
 
 func (e *eventController) GetEventsController(c echo.Context) error {
-	Events, err := e.EventS.GetEventsService()
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+
+	order := c.QueryParam("order")
+	search := c.QueryParam("search")
+
+	Events, totalData, err := e.EventS.GetEventsService(page, limit, order, search)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -38,9 +52,16 @@ func (e *eventController) GetEventsController(c echo.Context) error {
 		})
 	}
 
+	responseData := map[string]interface{}{
+		"data":       Events,
+		"page":       page,
+		"data_shown": len(Events),
+		"total_data": totalData,
+	}
+
 	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    Events,
-		Message: "Get all Events success",
+		Data:    responseData,
+		Message: "Get all Event success",
 		Status:  true,
 	})
 }

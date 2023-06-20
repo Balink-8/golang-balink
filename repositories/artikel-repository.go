@@ -7,7 +7,7 @@ import (
 )
 
 type ArtikelRepository interface {
-	GetArtikelsRepository() ([]*models.Artikel, error)
+	GetArtikelsRepository(page int, limit int, order string, search string) ([]*models.Artikel, int, error)
 	GetArtikelRepository(id string) (*models.Artikel, error)
 	CreateRepository(Artikel models.Artikel) (*models.Artikel, error)
 	UpdateRepository(id string, ArtikelBody models.Artikel) (*models.Artikel, error)
@@ -24,14 +24,35 @@ func NewArtikelRepository(DB *gorm.DB) ArtikelRepository {
 	}
 }
 
-func (a *artikelRepository) GetArtikelsRepository() ([]*models.Artikel, error) {
+func (a *artikelRepository) GetArtikelsRepository(page int, limit int, order string, search string) ([]*models.Artikel, int, error) {
 	var Artikels []*models.Artikel
+	var totalData int64
 
-	if err := a.DB.Find(&Artikels).Error; err != nil {
-		return nil, err
+	query := a.DB.Model(&models.Artikel{})
+
+	if search != "" {
+		query = query.Where("judul LIKE ?", "%"+search+"%")
 	}
 
-	return Artikels, nil
+	if err := query.Count(&totalData).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	query = query.Offset(offset).Limit(limit)
+
+	switch order {
+	case "asc":
+		query = query.Order("ID ASC")
+	case "desc":
+		query = query.Order("ID DESC")
+	}
+
+	if err := query.Find(&Artikels).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return Artikels, int(totalData), nil
 }
 
 func (a *artikelRepository) GetArtikelRepository(id string) (*models.Artikel, error) {
@@ -58,14 +79,14 @@ func (a *artikelRepository) UpdateRepository(id string, ArtikelBody models.Artik
 		return nil, err
 	}
 
-	err = a.DB.Where("ID = ?", id).Updates(models.Artikel{Gambar: ArtikelBody.Gambar, Judul: ArtikelBody.Judul, Isi: ArtikelBody.Isi}).Error
+	err = a.DB.Where("ID = ?", id).Updates(models.Artikel{Gambar: ArtikelBody.Gambar, Judul: ArtikelBody.Judul, Deskripsi: ArtikelBody.Deskripsi}).Error
 	if err != nil {
 		return nil, err
 	}
 
 	Artikel.Gambar = ArtikelBody.Gambar
 	Artikel.Judul = ArtikelBody.Judul
-	Artikel.Isi = ArtikelBody.Isi
+	Artikel.Deskripsi = ArtikelBody.Deskripsi
 
 	return Artikel, nil
 }

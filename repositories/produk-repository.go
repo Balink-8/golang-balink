@@ -7,7 +7,7 @@ import (
 )
 
 type ProdukRepository interface {
-	GetProduksRepository() ([]*models.Produk, error)
+	GetProduksRepository(page int, limit int, order string, search string) ([]*models.Produk, int, error)
 	GetProdukRepository(id string) (*models.Produk, error)
 	CreateRepository(Produk models.Produk) (*models.Produk, error)
 	UpdateRepository(id string, ProdukBody models.Produk) (*models.Produk, error)
@@ -24,14 +24,35 @@ func NewProdukRepository(DB *gorm.DB) ProdukRepository {
 	}
 }
 
-func (p *produkRepository) GetProduksRepository() ([]*models.Produk, error) {
+func (p *produkRepository) GetProduksRepository(page int, limit int, order string, search string) ([]*models.Produk, int, error) {
 	var Produks []*models.Produk
+	var totalData int64
 
-	if err := p.DB.Find(&Produks).Error; err != nil {
-		return nil, err
+	query := p.DB.Model(&models.Produk{})
+
+	if search != "" {
+		query = query.Where("nama LIKE ?", "%"+search+"%")
 	}
 
-	return Produks, nil
+	if err := query.Count(&totalData).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	query = query.Offset(offset).Limit(limit)
+
+	switch order {
+	case "asc":
+		query = query.Order("ID ASC")
+	case "desc":
+		query = query.Order("ID DESC")
+	}
+
+	if err := query.Find(&Produks).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return Produks, int(totalData), nil
 }
 
 func (p *produkRepository) GetProdukRepository(id string) (*models.Produk, error) {

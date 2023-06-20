@@ -4,6 +4,8 @@ import "gorm.io/gorm"
 
 type Promo struct {
 	gorm.Model
+	Nama			string `json:"nama" form:"nama"`
+	Deskripsi		string `json:"deskripsi" form:"deskripsi"`
 	Kode			string `json:"kode" form:"kode"`
-	Potongan_Harga	string `json:"Potongan_Harga" form:"Potongan_Harga"`
+	PotonganHarga	int64 `json:"potongan_harga" form:"Potongan_Harga"`
 }

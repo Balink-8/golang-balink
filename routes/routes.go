@@ -23,6 +23,10 @@ var (
 	userS = s.NewUserService(userR)
 	userC = c.NewUserController(userS, JWT)
 
+	profilePerusahaanR = r.NewProfilePerusahaanRepository(DB)
+	profilePerusahaanS = s.NewProfilePerusahaanService(profilePerusahaanR)
+	profilePerusahaanC = c.NewProfilePerusahaanController(profilePerusahaanS, JWT)
+
 	produkR = r.NewProdukRepository(DB)
 	produkS = s.NewProdukService(produkR)
 	produkC = c.NewProdukController(produkS)
@@ -47,9 +51,9 @@ var (
 	promoS = s.NewPromoService(promoR)
 	promoC = c.NewPromoController(promoS)
 
-	// masalahR = r.NewMasalahRepository(DB)
-	// masalahS = s.NewMasalahService(masalahR)
-	// masalahC = c.NewMasalahController(masalahS)
+	dashboardR = r.NewDashboardRepository(DB)
+	dashboardS = s.NewDashboardService(dashboardR)
+	dashboardC = c.NewDashboardController(dashboardS)
 
 	transaksiEventR = r.NewTransaksiEventRepository(DB)
 	transaksiEventS = s.NewTransaksiEventServices(transaksiEventR, keranjangR, produkR)
@@ -70,16 +74,20 @@ func New() *echo.Echo {
 
 	m.LoggerMiddleware(e)
 
+	e.Use(middleware.CORS())
+
 	auth := e.Group("")
 	auth.Use(middleware.JWT([]byte(os.Getenv("JWT_KEY"))))
 	auth.GET("/user", userC.GetUsersController)
 	auth.GET("/user/:id", userC.GetUserController)
-	e.POST("/user", userC.CreateController)
+	e.POST("/user_register", userC.CreateController)
 	auth.DELETE("/user/:id", userC.DeleteController)
-	// auth.PUT("/user/:id", userC.UpdateUserController)
+	auth.PUT("/user/:id", userC.UpdateController)
+	e.POST("/user_login", userC.LoginController)
 
-	// auth.GET("/admin", userC.GetAdminController)
-	// auth.PUT("/admin", userC.UpdateAdminController)
+	auth.GET("/admin", profilePerusahaanC.GetProfilePerusahaanController)
+	auth.PUT("/admin", profilePerusahaanC.UpdateController)
+	e.POST("/admin_login", profilePerusahaanC.LoginController)
 
 	auth.GET("/produk", produkC.GetProduksController)
 	auth.GET("/produk/:id", produkC.GetProdukController)
@@ -117,25 +125,9 @@ func New() *echo.Echo {
 	auth.DELETE("/promo/:id", promoC.DeleteController)
 	auth.PUT("/promo/:id", promoC.UpdateController)
 
-	// auth.GET("/masalah", masalahC.GetMasalahsController)
-	// auth.GET("/masalah/:id", masalahC.GetMasalahController)
-	// auth.POST("/masalah", masalahC.CreateController)
-
-	e.POST("/login", userC.LoginController)
-
 	auth.GET("/user/:id_user/keranjang", keranjangC.GetKeranjangByUserController)
 
-	// get transaksi event dan produk sukses lainnya masih eror
-	auth.GET("transaksi_event", transaksiEventC.GetTransaksiEventsController)
-	auth.GET("transaksi_event/:id", transaksiEventC.GetTransaksiEventController)
-	auth.POST("transaksi_event", transaksiEventC.CreateTransaksiEventController)
-	auth.GET("user/:id_user/transaksi_event", transaksiEventC.GetTransaksiEventByUserController)
-
-	auth.GET("transaksi_produk", transaksiProdukC.GetTransaksiProduksController)
-	auth.GET("transaksi_produk/:id", transaksiProdukC.GetTransaksiProdukController)
-	auth.POST("transaksi_produk", transaksiProdukC.CreateTransaksiProdukController)
-	auth.DELETE("transaksi_produk/:id", transaksiProdukC.DeleteTransaksiProdukController)
-	auth.GET("user/:id_user/transaksi_produk", transaksiProdukC.GetTransaksiProdukByUserController)
+	auth.GET("/web_dashboard", dashboardC.GetDashboardController)
 
 	return e
 }

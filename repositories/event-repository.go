@@ -7,7 +7,7 @@ import (
 )
 
 type EventRepository interface {
-	GetEventsRepository() ([]*models.Event, error)
+	GetEventsRepository(page int, limit int, order string, search string) ([]*models.Event, int, error)
 	GetEventRepository(id string) (*models.Event, error)
 	CreateRepository(Event models.Event) (*models.Event, error)
 	UpdateRepository(id string, EventBody models.Event) (*models.Event, error)
@@ -24,14 +24,35 @@ func NewEventRepository(DB *gorm.DB) EventRepository {
 	}
 }
 
-func (e *eventRepository) GetEventsRepository() ([]*models.Event, error) {
+func (e *eventRepository) GetEventsRepository(page int, limit int, order string, search string) ([]*models.Event, int, error) {
 	var Events []*models.Event
+	var totalData int64
 
-	if err := e.DB.Find(&Events).Error; err != nil {
-		return nil, err
+	query := e.DB.Model(&models.Event{})
+
+	if search != "" {
+		query = query.Where("nama LIKE ?", "%"+search+"%")
 	}
 
-	return Events, nil
+	if err := query.Count(&totalData).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	query = query.Offset(offset).Limit(limit)
+
+	switch order {
+	case "asc":
+		query = query.Order("ID ASC")
+	case "desc":
+		query = query.Order("ID DESC")
+	}
+
+	if err := query.Find(&Events).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return Events, int(totalData), nil
 }
 
 func (e *eventRepository) GetEventRepository(id string) (*models.Event, error) {

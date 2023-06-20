@@ -6,7 +6,7 @@ import (
 )
 
 type KategoriProdukService interface {
-	GetKategoriProduksService() ([]*models.KategoriProduk, error)
+	GetKategoriProduksService(page int, limit int, order string, search string) ([]*models.KategoriProduk, int, error)
 	GetKategoriProdukService(id string) (*models.KategoriProduk, error)
 	CreateService(KategoriProduk models.KategoriProduk) (*models.KategoriProduk, error)
 	UpdateService(id string, KategoriProdukBody models.KategoriProduk) (*models.KategoriProduk, error)
@@ -23,13 +23,13 @@ func NewKategoriProdukService(KategoriProdukR repositories.KategoriProdukReposit
 	}
 }
 
-func (k *kategoriProdukService) GetKategoriProduksService() ([]*models.KategoriProduk, error) {
-	KategoriProduks, err := k.KategoriProdukR.GetKategoriProduksRepository()
+func (k *kategoriProdukService) GetKategoriProduksService(page int, limit int, order string, search string) ([]*models.KategoriProduk, int, error) {
+	KategoriProduks, totalData, err := k.KategoriProdukR.GetKategoriProduksRepository(page, limit, order, search)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return KategoriProduks, nil
+	return KategoriProduks, totalData, nil
 }
 
 func (k *kategoriProdukService) GetKategoriProdukService(id string) (*models.KategoriProduk, error) {

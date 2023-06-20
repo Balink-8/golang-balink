@@ -1,6 +1,13 @@
 module capstone
 
-go 1.20
+go 1.19
+
+require (
+	github.com/labstack/echo/v4 v4.9.0
+	github.com/stretchr/testify v1.8.0
+	gorm.io/driver/mysql v1.3.6
+	gorm.io/gorm v1.23.10
+)
 
 require (
 	github.com/bytedance/sonic v1.9.1 // indirect
@@ -15,7 +22,7 @@ require (
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
+	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect

@@ -6,7 +6,7 @@ import (
 )
 
 type EventService interface {
-	GetEventsService() ([]*models.Event, error)
+	GetEventsService(page int, limit int, order string, search string) ([]*models.Event, int, error)
 	GetEventService(id string) (*models.Event, error)
 	CreateService(Event models.Event) (*models.Event, error)
 	UpdateService(id string, EventBody models.Event) (*models.Event, error)
@@ -23,13 +23,13 @@ func NewEventService(EventR repositories.EventRepository) EventService {
 	}
 }
 
-func (e *eventService) GetEventsService() ([]*models.Event, error) {
-	Events, err := e.EventR.GetEventsRepository()
+func (e *eventService) GetEventsService(page int, limit int, order string, search string) ([]*models.Event, int, error) {
+	Events, totalData, err := e.EventR.GetEventsRepository(page, limit, order, search)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return Events, nil
+	return Events, totalData, nil
 }
 
 func (e *eventService) GetEventService(id string) (*models.Event, error) {

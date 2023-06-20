@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 
@@ -29,7 +30,20 @@ func NewArtikelController(ArtikelS services.ArtikelService) ArtikelController {
 }
 
 func (a *artikelController) GetArtikelsController(c echo.Context) error {
-	Artikels, err := a.ArtikelS.GetArtikelsService()
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+
+	order := c.QueryParam("order")
+	search := c.QueryParam("search")
+
+	Artikels, totalData, err := a.ArtikelS.GetArtikelsService(page, limit, order, search)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -38,9 +52,16 @@ func (a *artikelController) GetArtikelsController(c echo.Context) error {
 		})
 	}
 
+	responseData := map[string]interface{}{
+		"data":       Artikels,
+		"page":       page,
+		"data_shown": len(Artikels),
+		"total_data": totalData,
+	}
+
 	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    Artikels,
-		Message: "Get all Artikels success",
+		Data:    responseData,
+		Message: "Get all Artikel success",
 		Status:  true,
 	})
 }
