@@ -32,7 +32,7 @@ var (
 	produkC = c.NewProdukController(produkS)
 
 	keranjangR = r.NewKeranjangRepository(DB)
-	keranjangS = s.NewKeranjangService(keranjangR)
+	keranjangS = s.NewKeranjangService(keranjangR, produkR)
 	keranjangC = c.NewKeranjangController(keranjangS)
 
 	artikelR = r.NewArtikelRepository(DB)

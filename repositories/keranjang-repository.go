@@ -8,7 +8,7 @@ import (
 
 type KeranjangRepository interface {
 	GetKeranjangsRepository(page int, limit int, order string) ([]*models.Keranjang, int, error)
-	GetKeranjangRepository(id string) (*models.Keranjang, error)
+	GetKeranjangRepository(id int64) (*models.Keranjang, error)
 	CreateRepository(Keranjang models.Keranjang) (*models.Keranjang, error)
 	UpdateRepository(id string, KeranjangBody models.Keranjang) (*models.Keranjang, error)
 	DeleteRepository(id string) error
@@ -50,7 +50,7 @@ func (k *keranjangRepository) GetKeranjangsRepository(page int, limit int, order
 	return Keranjangs, int(totalData), nil
 }
 
-func (k *keranjangRepository) GetKeranjangRepository(id string) (*models.Keranjang, error) {
+func (k *keranjangRepository) GetKeranjangRepository(id int64) (*models.Keranjang, error) {
 	var Keranjang *models.Keranjang
 
 	if err := k.DB.Where("id = ?", id).Take(&Keranjang).Error; err != nil {
@@ -100,10 +100,10 @@ func (k *keranjangRepository) DeleteRepository(id string) error {
 }
 
 func (k *keranjangRepository) GetKeranjangByUserRepository(User_ID string) ([]*models.Keranjang, error) {
-    var Keranjangs []*models.Keranjang
+	var Keranjangs []*models.Keranjang
 
-    if err := k.DB.Where("User_ID = ?", User_ID).Find(&Keranjangs).Error; err != nil {
-        return nil, err
-    }
-    return Keranjangs, nil
+	if err := k.DB.Where("User_ID = ?", User_ID).Find(&Keranjangs).Error; err != nil {
+		return nil, err
+	}
+	return Keranjangs, nil
 }
