@@ -6,33 +6,43 @@ import (
 )
 
 type PembayaranProdukService interface {
+	CreateService(PembayaranProduk models.PembayaranProduk) (*models.PembayaranProduk, error)
 }
 
 type pembayaranProdukService struct {
-	PP repositories.PembayaranProdukRepository
-	K repositories.KeranjangRepository
+	PP      repositories.PembayaranProdukRepository
+	K       repositories.KeranjangRepository
+	payment repositories.PaymentMethodRepository
 }
 
-func NewPembayaranProdukService(PP repositories.PembayaranProdukRepository, K repositories.KeranjangRepository) PembayaranProdukService {
+func NewPembayaranProdukService(PP repositories.PembayaranProdukRepository, K repositories.KeranjangRepository, payment repositories.PaymentMethodRepository) PembayaranProdukService {
 	return &pembayaranProdukService{
-		PP: PP,
-		K: K,
+		PP:      PP,
+		K:       K,
+		payment: payment,
 	}
 
 }
 
 func (pr *pembayaranProdukService) CreateService(PembayaranProduk models.PembayaranProduk) (*models.PembayaranProduk, error) {
+
 	keranjang, err := pr.K.GetKeranjangRepository(PembayaranProduk.KeranjangID)
 	if err != nil {
 		return nil, err
 	}
-    
+
+	payment, err := pr.payment.GetPaymentMethodRepository(PembayaranProduk.MetodePembayaranID)
+	if err != nil {
+		return nil, err
+	}
+
 	payload := models.PembayaranProduk{
-		KeranjangID: int64(keranjang.ID),
-		Status: `unpaid`,
+		Keranjang:        *keranjang,
+		Status:           `unpaid`,
 		AlamatPengiriman: PembayaranProduk.AlamatPengiriman,
-		Pesan: PembayaranProduk.Pesan,
-		PromoID: PembayaranProduk.PromoID,
+		Pesan:            PembayaranProduk.Pesan,
+		PromoID:          PembayaranProduk.PromoID,
+		MetodePembayaran: *payment,
 	}
 
 	PembayaranProdukodukR, err := pr.PP.CreatePembayaranProduk(payload)
