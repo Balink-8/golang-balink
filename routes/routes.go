@@ -55,6 +55,9 @@ var (
 	dashboardS = s.NewDashboardService(dashboardR)
 	dashboardC = c.NewDashboardController(dashboardS)
 
+	dashboardMobileR = r.NewDashboardMobileRepository(DB)
+	dashboardMobileS = s.NewDashboardMobileServices(dashboardMobileR)
+	dashboardMobileC = c.NewDashboardMobileController(dashboardMobileS)
 )
 
 func New() *echo.Echo {
@@ -68,6 +71,8 @@ func New() *echo.Echo {
 	m.LoggerMiddleware(e)
 
 	e.Use(middleware.CORS())
+
+	e.GET("/dashboard-mobile", dashboardMobileC.DashboardMobileGetAll)
 
 	auth := e.Group("")
 	auth.Use(middleware.JWT([]byte(os.Getenv("JWT_KEY"))))
