@@ -46,7 +46,7 @@ func (p *pembayaranProdukController) CreateController(c echo.Context) error {
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    PembayaranProduk,
-		Message: "Create Produk success",
+		Message: "Create Pembayaran success",
 		Status:  true,
 	})
 }
