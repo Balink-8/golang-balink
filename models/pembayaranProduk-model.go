@@ -13,5 +13,6 @@ type PembayaranProduk struct {
 	Pesan              string `json:"pesan" form:"pesan"`
 	PromoID            int64  `json:"promo_id" form:"promo_id"`
 	MetodePembayaranID int64  `json:"metode_pembayaran_id" form:"metode_pembayaran"`
+	BuktiPembayaran    string `json:"bukti_pembayaran" form:"bukti_pembayaran"`
 	MetodePembayaran   MetodePembayaran
 }

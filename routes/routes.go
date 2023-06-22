@@ -67,9 +67,9 @@ var (
 	PembayaranProdukS = s.NewPembayaranProdukService(pembayaranProdukR, keranjangR, paymentMethodR)
 	pembayaranProdukC = c.NewPembayaranProdukController(PembayaranProdukS)
 
-	pembayaranEventR = r.NewPembayaranEventRepository(DB)
-	PembayaranEventS = s.NewPembayaranEventService(pembayaranEventR, paymentMethodR)
-	pembayaranEventC = c.NewPembayaranEventController(PembayaranEventS)
+	// pembayaranEventR = r.NewPembayaranEventRepository(DB)
+	// PembayaranEventS = s.NewPembayaranEventService(pembayaranEventR, paymentMethodR)
+	// pembayaranEventC = c.NewPembayaranEventController(PembayaranEventS)
 
 	paymentMethodR = r.NewPaymentMethodRepository(DB)
 )
@@ -136,8 +136,9 @@ func New() *echo.Echo {
 	auth.PUT("/promo/:id", promoC.UpdateController)
 
 	auth.POST("/pembayaran_produk", pembayaranProdukC.CreateController)
+	auth.PUT("/bukti_pembayaran/:id", pembayaranProdukC.UploadBuktiPembayaranController)
 
-	auth.POST("/pembayaran_event", pembayaranEventC.CreateController)
+	// auth.POST("/pembayaran_event", pembayaranEventC.CreateController)
 
 	auth.GET("/user/:id_user/keranjang", keranjangC.GetKeranjangByUserController)
 
