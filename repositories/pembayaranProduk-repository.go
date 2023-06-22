@@ -31,7 +31,7 @@ func (p *pembayaranProdukRepository) CreatePembayaranProduk(pembayaranProduk mod
 }
 func (p *pembayaranProdukRepository) UpdateRepository(pembayaranProduk models.PembayaranProduk) error {
 
-	err := p.DB.preload.Updates(&pembayaranProduk).Error
+	err := p.DB.Preload("Keranjang").Preload("BuktiPembayaran").Updates(&pembayaranProduk).Error
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func (p *pembayaranProdukRepository) UpdateRepository(pembayaranProduk models.Pe
 func (p *pembayaranProdukRepository) GetPembayaranProdukRepository(id int) (*models.PembayaranProduk, error) {
 	var PembayaranProduk *models.PembayaranProduk
 
-	if err := p.DB.Where("id = ?", id).First(&PembayaranProduk).Error; err != nil {
+	if err := p.DB.Preload("Keranjang").Preload("MetodePembayaran").Where("id = ?", id).First(&PembayaranProduk).Error; err != nil {
 		return nil, err
 	}
 
