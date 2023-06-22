@@ -82,6 +82,7 @@ func New() *echo.Echo {
 	auth.DELETE("/user/:id", userC.DeleteController)
 	auth.PUT("/user/:id", userC.UpdateController)
 	e.POST("/user_login", userC.LoginController)
+	e.POST("/forget_password", userC.ForgotPasswordController)
 
 	auth.GET("/admin", profilePerusahaanC.GetProfilePerusahaanController)
 	auth.PUT("/admin", profilePerusahaanC.UpdateController)

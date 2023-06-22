@@ -13,6 +13,8 @@ type UserRepository interface {
 	UpdateRepository(id string, userBody models.User) (*models.User, error)
 	DeleteRepository(id string) error
 	LoginRepository(login models.User) (*models.User, error)
+	CekEmailRepository(email string) (*models.User, error)
+	UpdatesRepository(user models.User) error
 }
 
 type userRepository struct {
@@ -114,4 +116,22 @@ func (u *userRepository) LoginRepository(login models.User) (*models.User, error
 	}
 
 	return &login, nil
+}
+
+func (u *userRepository) CekEmailRepository(email string) (*models.User, error) {
+	var user = models.User{}
+	if err := u.DB.Where("email = ?", email).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (u *userRepository) UpdatesRepository(user models.User) error {
+
+	if err := u.DB.Updates(&user).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
