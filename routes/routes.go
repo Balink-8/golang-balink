@@ -55,14 +55,6 @@ var (
 	dashboardS = s.NewDashboardService(dashboardR)
 	dashboardC = c.NewDashboardController(dashboardS)
 
-	transaksiEventR = r.NewTransaksiEventRepository(DB)
-	transaksiEventS = s.NewTransaksiEventServices(transaksiEventR, keranjangR, produkR)
-	transaksiEventC = c.NewTransaksiEventController(transaksiEventS)
-
-	transaksiProdukR = r.NewTransaksiProdukRepository(DB)
-	transaksiProdukS = s.NewTransaksiProdukServices(transaksiProdukR, keranjangR, produkR)
-	transaksiProdukC = c.NewTransaksiProdukController(transaksiProdukS)
-
 	pembayaranProdukR = r.NewPembayaranProdukRepository(DB)
 	PembayaranProdukS = s.NewPembayaranProdukService(pembayaranProdukR, keranjangR, paymentMethodR)
 	pembayaranProdukC = c.NewPembayaranProdukController(PembayaranProdukS)
