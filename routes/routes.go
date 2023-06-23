@@ -55,6 +55,9 @@ var (
 	dashboardS = s.NewDashboardService(dashboardR)
 	dashboardC = c.NewDashboardController(dashboardS)
 
+	dashboardMobileR = r.NewDashboardMobileRepository(DB)
+	dashboardMobileS = s.NewDashboardMobileServices(dashboardMobileR)
+	dashboardMobileC = c.NewDashboardMobileController(dashboardMobileS)
 )
 
 func New() *echo.Echo {
@@ -69,6 +72,8 @@ func New() *echo.Echo {
 
 	e.Use(middleware.CORS())
 
+	e.GET("/dashboard-mobile", dashboardMobileC.DashboardMobileGetAll)
+
 	auth := e.Group("")
 	auth.Use(middleware.JWT([]byte(os.Getenv("JWT_KEY"))))
 	auth.GET("/user", userC.GetUsersController)
@@ -77,6 +82,7 @@ func New() *echo.Echo {
 	auth.DELETE("/user/:id", userC.DeleteController)
 	auth.PUT("/user/:id", userC.UpdateController)
 	e.POST("/user_login", userC.LoginController)
+	e.POST("/forget_password", userC.ForgotPasswordController)
 
 	auth.GET("/admin", profilePerusahaanC.GetProfilePerusahaanController)
 	auth.PUT("/admin", profilePerusahaanC.UpdateController)

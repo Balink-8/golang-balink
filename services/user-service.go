@@ -3,6 +3,7 @@ package services
 import (
 	"capstone/models"
 	"capstone/repositories"
+	"errors"
 )
 
 type UserService interface {
@@ -12,6 +13,7 @@ type UserService interface {
 	UpdateService(id string, userBody models.User) (*models.User, error)
 	DeleteService(id string) error
 	LoginService(login models.User) (*models.User, error)
+	ForgotPasswordService(req *models.ForgotPassword) (*models.User, error)
 }
 
 type userService struct {
@@ -76,4 +78,22 @@ func (u *userService) LoginService(login models.User) (*models.User, error) {
 	}
 
 	return loginR, nil
+}
+
+func (u *userService) ForgotPasswordService(req *models.ForgotPassword) (*models.User, error) {
+	user, err := u.UserR.CekEmailRepository(req.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.Password != req.Confirm_Password {
+		return nil, errors.New("Password Tidak Cocok")
+	}
+	user.Password = req.Password
+	err = u.UserR.UpdatesRepository(*user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
