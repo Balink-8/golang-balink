@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	h "capstone/helpers"
+	"capstone/middlewares"
 	m "capstone/middlewares"
 	"capstone/models"
 	"capstone/services"
@@ -19,17 +20,18 @@ type UserController interface {
 	UpdateController(c echo.Context) error
 	DeleteController(c echo.Context) error
 	LoginController(c echo.Context) error
+	LogoutController(c echo.Context) error
 }
 
 type userController struct {
 	UserS services.UserService
-	jwt m.JWTS
+	jwt   m.JWTS
 }
 
 func NewUserController(UserS services.UserService, jwtS m.JWTS) UserController {
 	return &userController{
 		UserS: UserS,
-		jwt: jwtS,
+		jwt:   jwtS,
 	}
 }
 
@@ -239,6 +241,24 @@ func (u *userController) LoginController(c echo.Context) error {
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    user,
 		Message: "Login success",
+		Status:  true,
+	})
+}
+
+func (u *userController) LogoutController(c echo.Context) error {
+	_, err := middlewares.IsUser(c)
+	if err != nil {
+		return err
+	}
+
+	err = u.jwt.LogoutJWTToken(c)
+	if err != nil {
+		return err
+	}
+
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    nil,
+		Message: "Logout success",
 		Status:  true,
 	})
 }
