@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -97,28 +98,41 @@ func (k *kategoriProdukController) GetKategoriProdukController(c echo.Context) e
 }
 
 func (k *kategoriProdukController) CreateController(c echo.Context) error {
-	var KategoriProduk *models.KategoriProduk
+	var kategoriProduk models.KategoriProduk
 
-	err := c.Bind(&KategoriProduk)
+	err := c.Bind(&kategoriProduk)
 	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	KategoriProduk, err = k.KategoriProdukS.CreateService(*KategoriProduk)
+	file, err := c.FormFile("image")
 	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Image cannot be empty", err)
 	}
 
-	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    KategoriProduk,
+	src, err := file.Open()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to open file", err)
+	}
+
+	re := regexp.MustCompile(`.png|.jpeg|.jpg`)
+	if !re.MatchString(file.Filename) {
+		return echo.NewHTTPError(http.StatusBadRequest, "The provided file format is not allowed. Please upload a JPEG or PNG image")
+	}
+
+	uploadURL, err := services.NewMediaUpload().FileUpload(models.File{File: src})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error uploading photo", err)
+	}
+	kategoriProduk.Image = uploadURL
+
+	createdKategoriProduk, err := k.KategoriProdukS.CreateService(kategoriProduk)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, h.ResponseModel{
+		Data:    createdKategoriProduk,
 		Message: "Create Kategori Produk success",
 		Status:  true,
 	})

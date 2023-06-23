@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -97,28 +98,41 @@ func (p *promoController) GetPromoController(c echo.Context) error {
 }
 
 func (p *promoController) CreateController(c echo.Context) error {
-	var Promo *models.Promo
+	var promo models.Promo
 
-	err := c.Bind(&Promo)
+	err := c.Bind(&promo)
 	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	Promo, err = p.PromoS.CreateService(*Promo)
+	file, err := c.FormFile("image")
 	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Image cannot be empty", err)
 	}
 
-	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    Promo,
+	src, err := file.Open()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to open file", err)
+	}
+
+	re := regexp.MustCompile(`.png|.jpeg|.jpg`)
+	if !re.MatchString(file.Filename) {
+		return echo.NewHTTPError(http.StatusBadRequest, "The provided file format is not allowed. Please upload a JPEG or PNG image")
+	}
+
+	uploadURL, err := services.NewMediaUpload().FileUpload(models.File{File: src})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error uploading photo", err)
+	}
+	promo.Image = uploadURL
+
+	createdPromo, err := p.PromoS.CreateService(promo)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, h.ResponseModel{
+		Data:    createdPromo,
 		Message: "Create Promo success",
 		Status:  true,
 	})

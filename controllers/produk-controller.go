@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -107,6 +108,45 @@ func (p *produkController) CreateController(c echo.Context) error {
 			Status:  false,
 		})
 	}
+
+	file, err := c.FormFile("image") // Mengubah ctx menjadi c pada bagian ini
+
+	if err != nil {
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: "Image cannot be empty", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: "Failed to open file", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
+	}
+
+	re := regexp.MustCompile(`.png|.jpeg|.jpg`)
+
+	if !re.MatchString(file.Filename) {
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: "The provided file format is not allowed. Please upload a JPEG or PNG image", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
+	}
+
+	uploadUrl, err := services.NewMediaUpload().FileUpload(models.File{File: src})
+	if err != nil {
+		return h.Response(c, http.StatusInternalServerError, h.ResponseModel{
+			Data:    nil,
+			Message: "Error uploading photo", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
+	}
+	Produk.Image = uploadUrl // Mengubah artikelInput menjadi Produk
 
 	Produk, err = p.ProdukS.CreateService(*Produk)
 	if err != nil {

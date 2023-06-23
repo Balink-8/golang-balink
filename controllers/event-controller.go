@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -97,28 +98,41 @@ func (e *eventController) GetEventController(c echo.Context) error {
 }
 
 func (e *eventController) CreateController(c echo.Context) error {
-	var Event *models.Event
+	var Event models.Event
 
 	err := c.Bind(&Event)
 	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	Event, err = e.EventS.CreateService(*Event)
+	file, err := c.FormFile("image")
 	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Image cannot be empty", err)
 	}
 
-	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    Event,
+	src, err := file.Open()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to open file", err)
+	}
+
+	re := regexp.MustCompile(`.png|.jpeg|.jpg`)
+	if !re.MatchString(file.Filename) {
+		return echo.NewHTTPError(http.StatusBadRequest, "The provided file format is not allowed. Please upload a JPEG or PNG image")
+	}
+
+	uploadURL, err := services.NewMediaUpload().FileUpload(models.File{File: src})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error uploading photo", err)
+	}
+	Event.Image = uploadURL
+
+	createdEvent, err := e.EventS.CreateService(Event)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, h.ResponseModel{
+		Data:    createdEvent,
 		Message: "Create Event success",
 		Status:  true,
 	})

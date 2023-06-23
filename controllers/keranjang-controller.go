@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -17,7 +18,7 @@ type KeranjangController interface {
 	CreateController(c echo.Context) error
 	UpdateController(c echo.Context) error
 	DeleteController(c echo.Context) error
-	GetKeranjangByUserController(c echo. Context) error
+	GetKeranjangByUserController(c echo.Context) error
 }
 
 type keranjangController struct {
@@ -98,28 +99,41 @@ func (k *keranjangController) GetKeranjangController(c echo.Context) error {
 }
 
 func (k *keranjangController) CreateController(c echo.Context) error {
-	var Keranjang *models.Keranjang
+	var Keranjang models.Keranjang
 
 	err := c.Bind(&Keranjang)
 	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	Keranjang, err = k.KeranjangS.CreateService(*Keranjang)
+	file, err := c.FormFile("image")
 	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: err.Error(),
-			Status:  false,
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Image cannot be empty", err)
 	}
 
-	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    Keranjang,
+	src, err := file.Open()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to open file", err)
+	}
+
+	re := regexp.MustCompile(`.png|.jpeg|.jpg`)
+	if !re.MatchString(file.Filename) {
+		return echo.NewHTTPError(http.StatusBadRequest, "The provided file format is not allowed. Please upload a JPEG or PNG image")
+	}
+
+	uploadURL, err := services.NewMediaUpload().FileUpload(models.File{File: src})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error uploading photo", err)
+	}
+	Keranjang.Image = uploadURL
+
+	createdKeranjang, err := k.KeranjangS.CreateService(Keranjang)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, h.ResponseModel{
+		Data:    createdKeranjang,
 		Message: "Create Keranjang success",
 		Status:  true,
 	})
@@ -193,26 +207,26 @@ func (k *keranjangController) DeleteController(c echo.Context) error {
 }
 
 func (k *keranjangController) GetKeranjangByUserController(c echo.Context) error {
-    id_user := c.Param("id_user")
-    err := h.IsNumber(id_user)
-    if err != nil {
-        return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-            Data:    nil,
-            Message: err.Error(),
-            Status:  false,
-        })
-    }
-    Keranjangs, err := k.KeranjangS.GetKeranjangByUserService(id_user)
-    if err != nil {
-        return h.Response(c, http.StatusNotFound, h.ResponseModel{
-            Data:    nil,
-            Message: err.Error(),
-            Status:  false,
-        })
-    }
-    return h.Response(c, http.StatusOK, h.ResponseModel{
-        Data:    Keranjangs,
-        Message: "Get Keranjang By User success",
-        Status:  true,
-    })
+	id_user := c.Param("id_user")
+	err := h.IsNumber(id_user)
+	if err != nil {
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
+	}
+	Keranjangs, err := k.KeranjangS.GetKeranjangByUserService(id_user)
+	if err != nil {
+		return h.Response(c, http.StatusNotFound, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
+	}
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    Keranjangs,
+		Message: "Get Keranjang By User success",
+		Status:  true,
+	})
 }
