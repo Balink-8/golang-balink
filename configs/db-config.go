@@ -12,6 +12,8 @@ import (
 	"capstone/models"
 )
 
+var db *gorm.DB
+
 type Config struct {
 	DB_Username string
 	DB_Password string
@@ -41,7 +43,7 @@ func InitDB() *gorm.DB {
 		config.DB_Port,
 		config.DB_Name,
 	)
-	var db *gorm.DB
+
 	env := "dev"
 	switch env {
 	case "prod":
@@ -58,6 +60,8 @@ func InitDB() *gorm.DB {
 
 	InitialMigration(db)
 
+	seeder()
+
 	return db
 }
 
@@ -70,4 +74,20 @@ func InitialMigration(db *gorm.DB) {
 	db.AutoMigrate(&models.KategoriProduk{})
 	db.AutoMigrate(&models.Promo{})
 	db.AutoMigrate(&models.ProfilePerusahaan{})
+	db.AutoMigrate(&models.MetodePembayaran{})
+	db.AutoMigrate(&models.PembayaranProduk{}, &models.PembayaranEvent{},)
+
+}
+
+func seeder() {
+	MetodePembayaran := []models.MetodePembayaran{
+		{Nama: "BCA", VA: 135353546},
+	}
+	for _, v := range MetodePembayaran {
+		var exist models.MetodePembayaran
+		err := db.Where("nama = ?", v.Nama).First(&exist).Error
+		if err != nil {
+			db.Create(&v)
+		}
+	}
 }

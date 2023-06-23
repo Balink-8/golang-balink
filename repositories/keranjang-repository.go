@@ -106,10 +106,10 @@ func (k *keranjangRepository) DeleteRepository(id string) error {
 }
 
 func (k *keranjangRepository) GetKeranjangByUserRepository(User_ID string) ([]*models.Keranjang, error) {
-    var Keranjangs []*models.Keranjang
+	var Keranjangs []*models.Keranjang
 
-    if err := k.DB.Where("User_ID = ?", User_ID).Find(&Keranjangs).Error; err != nil {
-        return nil, err
-    }
-    return Keranjangs, nil
+	if err := k.DB.Where("User_ID = ?", User_ID).Find(&Keranjangs).Error; err != nil {
+		return nil, err
+	}
+	return Keranjangs, nil
 }

@@ -119,7 +119,7 @@ func (k *kategoriProdukController) CreateController(c echo.Context) error {
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    KategoriProduk,
-		Message: "Create KategoriProduk success",
+		Message: "Create Kategori Produk success",
 		Status:  true,
 	})
 }
