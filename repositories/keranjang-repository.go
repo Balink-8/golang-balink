@@ -74,14 +74,14 @@ func (k *keranjangRepository) UpdateRepository(id string, KeranjangBody models.K
 		return nil, err
 	}
 
-	err = k.DB.Where("ID = ?", id).Updates(models.Keranjang{User_ID: KeranjangBody.User_ID, Produk_ID: KeranjangBody.Produk_ID, Jumlah: KeranjangBody.Jumlah}).Error
+	err = k.DB.Where("ID = ?", id).Updates(models.Keranjang{User_ID: KeranjangBody.User_ID, Produk_ID: KeranjangBody.Produk_ID, Total: KeranjangBody.Total}).Error
 	if err != nil {
 		return nil, err
 	}
 
 	Keranjang.User_ID = KeranjangBody.User_ID
 	Keranjang.Produk_ID = KeranjangBody.Produk_ID
-	Keranjang.Jumlah = KeranjangBody.Jumlah
+	Keranjang.Total = KeranjangBody.Total
 
 	return Keranjang, nil
 }

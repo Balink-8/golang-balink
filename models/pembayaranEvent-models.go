@@ -11,8 +11,8 @@ type PembayaranEvent struct {
 	KodePembayaran     string `json:"kode_pembayaran" form:"kode_pembayaran"`
 	BuktiPembayaran    string `json:"bukti_pembayaran" form:"bukti_pembayaran"`
 	Status             string `json:"status" form:"status"`
-	Jumlah             int64  `json:"jumlah" form:"jumlah"`
 	Qty                int64  `json:"qty" form:"qty"`
+	Total             int64  `json:"total" form:"total"`
 	PromoID            int64  `json:"promo_id" form:"promo_id"`
 	MetodePembayaranID int64  `json:"metode_pembayaran_id" form:"metode_pembayaran"`
 	MetodePembayaran   MetodePembayaran

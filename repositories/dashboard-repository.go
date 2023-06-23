@@ -61,7 +61,7 @@ func (d *dashboardRepository) GetCountUserSebulanRepository() (float64, error) {
 // 	lastMonth := time.Now().AddDate(0, -1, 0)
 
 // 	query := `
-// 		SELECT SUM(k.jumlah) 
+// 		SELECT SUM(k.jumlah)
 // 		FROM keranjangs k JOIN transaksi_produks t ON k.id=t.keranjang_id
 // 		WHERE k.created_at >= ? AND k.deleted_at is NULL;
 // 	`

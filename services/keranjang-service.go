@@ -56,7 +56,7 @@ func (k *keranjangService) CreateService(Keranjang models.Keranjang) (*models.Ke
 		User_ID: Keranjang.User_ID,
 		Produk_ID: p_id,
 		Qty: Keranjang.Qty,
-		Jumlah: Keranjang.Qty * produk.Harga,
+		Total: Keranjang.Qty * produk.Harga,
 	}
 
 	KeranjangR, err := k.KeranjangR.CreateRepository(payload)
