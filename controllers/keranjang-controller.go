@@ -42,8 +42,9 @@ func (k *keranjangController) GetKeranjangsController(c echo.Context) error {
 	}
 
 	order := c.QueryParam("order")
+	search := c.QueryParam("search")
 
-	Keranjangs, totalData, err := k.KeranjangS.GetKeranjangsService(page, limit, order)
+	Keranjangs, totalData, err := k.KeranjangS.GetKeranjangsService(page, limit, order, search)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
