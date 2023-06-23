@@ -7,7 +7,7 @@ import (
 )
 
 type KeranjangRepository interface {
-	GetKeranjangsRepository(page int, limit int, order string) ([]*models.Keranjang, int, error)
+	GetKeranjangsRepository(page int, limit int, order string, search string) ([]*models.Keranjang, int, error)
 	GetKeranjangRepository(id string) (*models.Keranjang, error)
 	CreateRepository(Keranjang models.Keranjang) (*models.Keranjang, error)
 	UpdateRepository(id string, KeranjangBody models.Keranjang) (*models.Keranjang, error)
@@ -25,16 +25,22 @@ func NewKeranjangRepository(DB *gorm.DB) KeranjangRepository {
 	}
 }
 
-func (k *keranjangRepository) GetKeranjangsRepository(page int, limit int, order string) ([]*models.Keranjang, int, error) {
+func (k *keranjangRepository) GetKeranjangsRepository(page int, limit int, order string, search string) ([]*models.Keranjang, int, error) {
 	var Keranjangs []*models.Keranjang
 	var totalData int64
 
-	if err := k.DB.Model(&models.Keranjang{}).Count(&totalData).Error; err != nil {
+	query := k.DB.Model(&models.Keranjang{})
+
+	if search != "" {
+		query = query.Where("nama LIKE ?", "%"+search+"%")
+	}
+
+	if err := query.Count(&totalData).Error; err != nil {
 		return nil, 0, err
 	}
 
 	offset := (page - 1) * limit
-	query := k.DB.Offset(offset).Limit(limit)
+	query = query.Offset(offset).Limit(limit)
 
 	switch order {
 	case "asc":
@@ -100,10 +106,10 @@ func (k *keranjangRepository) DeleteRepository(id string) error {
 }
 
 func (k *keranjangRepository) GetKeranjangByUserRepository(User_ID string) ([]*models.Keranjang, error) {
-    var Keranjangs []*models.Keranjang
+	var Keranjangs []*models.Keranjang
 
-    if err := k.DB.Where("User_ID = ?", User_ID).Find(&Keranjangs).Error; err != nil {
-        return nil, err
-    }
-    return Keranjangs, nil
+	if err := k.DB.Where("User_ID = ?", User_ID).Find(&Keranjangs).Error; err != nil {
+		return nil, err
+	}
+	return Keranjangs, nil
 }

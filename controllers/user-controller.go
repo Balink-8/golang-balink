@@ -20,7 +20,11 @@ type UserController interface {
 	UpdateController(c echo.Context) error
 	DeleteController(c echo.Context) error
 	LoginController(c echo.Context) error
+<<<<<<< HEAD
 	LogoutController(c echo.Context) error
+=======
+	ForgotPasswordController(c echo.Context) error
+>>>>>>> 6373c6a7dfb47cd9eaef2b39d69eec70d1f00f86
 }
 
 type userController struct {
@@ -245,6 +249,7 @@ func (u *userController) LoginController(c echo.Context) error {
 	})
 }
 
+<<<<<<< HEAD
 func (u *userController) LogoutController(c echo.Context) error {
 	_, err := middlewares.IsUser(c)
 	if err != nil {
@@ -259,6 +264,26 @@ func (u *userController) LogoutController(c echo.Context) error {
 	return h.Response(c, http.StatusOK, h.ResponseModel{
 		Data:    nil,
 		Message: "Logout success",
+=======
+func (u *userController) ForgotPasswordController(c echo.Context) error {
+
+	payload := models.ForgotPassword{}
+
+	c.Bind(&payload)
+
+	user, err := u.UserS.ForgotPasswordService(&payload)
+	if err != nil {
+		return h.Response(c, http.StatusNotFound, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
+	}
+
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    user,
+		Message: "Update Password success",
+>>>>>>> 6373c6a7dfb47cd9eaef2b39d69eec70d1f00f86
 		Status:  true,
 	})
 }
