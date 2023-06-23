@@ -7,7 +7,7 @@ import (
 )
 
 type KeranjangService interface {
-	GetKeranjangsService(page int, limit int, order string) ([]*models.Keranjang, int, error)
+	GetKeranjangsService(page int, limit int, order string, search string) ([]*models.Keranjang, int, error)
 	GetKeranjangService(id string) (*models.Keranjang, error)
 	CreateService(Keranjang models.Keranjang) (*models.Keranjang, error)
 	UpdateService(id string, KeranjangBody models.Keranjang) (*models.Keranjang, error)
@@ -27,8 +27,8 @@ func NewKeranjangService(KeranjangR repositories.KeranjangRepository, ProdukR re
 	}
 }
 
-func (k *keranjangService) GetKeranjangsService(page int, limit int, order string) ([]*models.Keranjang, int, error) {
-	Keranjangs, totalData, err := k.KeranjangR.GetKeranjangsRepository(page, limit, order)
+func (k *keranjangService) GetKeranjangsService(page int, limit int, order string, search string) ([]*models.Keranjang, int, error) {
+	Keranjangs, totalData, err := k.KeranjangR.GetKeranjangsRepository(page, limit, order, search)
 	if err != nil {
 		return nil, 0, err
 	}
