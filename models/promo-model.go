@@ -8,5 +8,5 @@ type Promo struct {
 	Deskripsi     string `json:"deskripsi" form:"deskripsi"`
 	Kode          string `json:"kode" form:"kode"`
 	PotonganHarga int64  `json:"potongan_harga" form:"Potongan_Harga"`
-	Image         string
+	Image         string `json:"image" from:"image"`
 }

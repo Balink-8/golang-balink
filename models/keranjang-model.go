@@ -8,5 +8,5 @@ type Keranjang struct {
 	Produk_ID string `json:"produk_id" form:"produk_id"`
 	Qty       int64  `json:"qty" form:"qty"`
 	Total     int64  `json:"total" form:"total"`
-	Image     string
+	Image       string `json:"image" from:"image"`
 }
