@@ -82,12 +82,12 @@ func (pr *pembayaranEventService) CreateService(PembayaranEvent models.Pembayara
 	}
 
 	payload := models.PembayaranEvent{
-		Keranjang:        *keranjang,
+		Keranjang:        keranjang,
 		Status:           `unpaid`,
 		AlamatPengiriman: PembayaranEvent.AlamatPengiriman,
 		Pesan:            PembayaranEvent.Pesan,
 		PromoID:          PembayaranEvent.PromoID,
-		MetodePembayaran: *payment,
+		MetodePembayaran: payment,
 	}
 
 	PembayaranEventodukR, err := pr.PP.CreatePembayaranEvent(payload)
