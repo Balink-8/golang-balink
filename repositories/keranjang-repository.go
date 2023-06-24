@@ -9,7 +9,7 @@ import (
 type KeranjangRepository interface {
 	GetKeranjangsRepository(page int, limit int, order string, search string) ([]*models.Keranjang, int, error)
 	GetKeranjangRepository(id string) (*models.Keranjang, error)
-	CreateRepository(Keranjang models.Keranjang) (*models.Keranjang, error)
+	CreateRepository(Keranjang models.Keranjang) (models.Keranjang, error)
 	UpdateRepository(id string, KeranjangBody models.Keranjang) (*models.Keranjang, error)
 	DeleteRepository(id string) error
 	GetKeranjangByUserRepository(User_ID string) ([]*models.Keranjang, error)
@@ -66,12 +66,12 @@ func (k *keranjangRepository) GetKeranjangRepository(id string) (*models.Keranja
 	return Keranjang, nil
 }
 
-func (k *keranjangRepository) CreateRepository(Keranjang models.Keranjang) (*models.Keranjang, error) {
-	if err := k.DB.Save(&Keranjang).Error; err != nil {
-		return nil, err
+func (K *keranjangRepository) CreateRepository(Keranjang models.Keranjang) (models.Keranjang, error) {
+	if err := K.DB.Save(&Keranjang).Error; err != nil {
+		return models.Keranjang{}, err
 	}
 
-	return &Keranjang, nil
+	return Keranjang, nil
 }
 
 func (k *keranjangRepository) UpdateRepository(id string, KeranjangBody models.Keranjang) (*models.Keranjang, error) {
