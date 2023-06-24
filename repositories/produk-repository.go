@@ -79,7 +79,7 @@ func (p *produkRepository) UpdateRepository(id string, ProdukBody models.Produk)
 		return nil, err
 	}
 
-	err = p.DB.Where("ID = ?", id).Updates(models.Produk{Kategori_ID: ProdukBody.Kategori_ID , Nama: ProdukBody.Nama, Deskripsi: ProdukBody.Deskripsi, Harga: ProdukBody.Harga, Stok: ProdukBody.Stok}).Error
+	err = p.DB.Where("ID = ?", id).Updates(models.Produk{Kategori_ID: ProdukBody.Kategori_ID, Nama: ProdukBody.Nama, Deskripsi: ProdukBody.Deskripsi, Harga: ProdukBody.Harga, Stok: ProdukBody.Stok}).Error
 	if err != nil {
 		return nil, err
 	}

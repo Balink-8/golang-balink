@@ -7,5 +7,5 @@ type Artikel struct {
 	Gambar    string `json:"gambar" form:"gambar"`
 	Judul     string `json:"judul" form:"judul"`
 	Deskripsi string `json:"deskripsi" form:"deskripsi"`
-	Image     string
+	Image     string `json:"image" from:"image"`
 }

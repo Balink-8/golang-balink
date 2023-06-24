@@ -61,7 +61,7 @@ func (a *IProdukRepositoryMock) CreateRepository(ProdukData models.Produk) (*mod
 func (a *IProdukRepositoryMock) UpdateRepository(id string, ProdukData models.Produk) (*models.Produk, error) {
 	args := a.Mock.Called(id, ProdukData)
 	if args.Get(0) == nil {
-		return nil,  args.Get(1).(error)
+		return nil, args.Get(1).(error)
 	}
 
 	Produk := args.Get(0).(models.Produk)
