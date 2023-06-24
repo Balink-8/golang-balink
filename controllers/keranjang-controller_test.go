@@ -27,14 +27,14 @@ var (
 func TestGetKeranjangsController_Success(t *testing.T) {
 	Keranjangs := []*models.Keranjang{
 		{
-			User_ID: "1",
+			User_ID:   "1",
 			Produk_ID: "1",
-			Jumlah: 3,
+			Total:     3,
 		},
 		{
-			User_ID: "1",
+			User_ID:   "1",
 			Produk_ID: "1",
-			Jumlah: 3,
+			Total:     3,
 		},
 	}
 
@@ -75,9 +75,9 @@ func TestGetKeranjangController_Success(t *testing.T) {
 		Model: gorm.Model{
 			ID: 2,
 		},
-		User_ID: "1",
-        Produk_ID: "1",
-		Jumlah: 3,
+		User_ID:   "1",
+		Produk_ID: "1",
+		Total:     3,
 	}
 
 	KeranjangRMock.Mock.On("GetKeranjangRepository", "2").Return(Keranjang, nil)
@@ -131,9 +131,9 @@ func TestGetKeranjangController_Failure2(t *testing.T) {
 
 func TestCreateKeranjangController_Success(t *testing.T) {
 	Keranjang := models.Keranjang{
-		User_ID: "1",
-        Produk_ID: "1",
-		Jumlah: 3,
+		User_ID:   "1",
+		Produk_ID: "1",
+		Total:     3,
 	}
 
 	KeranjangRMock.Mock.On("CreateRepository", Keranjang).Return(Keranjang, nil)
@@ -202,9 +202,9 @@ func TestUpdateKeranjangController_Success(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		User_ID: "1",
-        Produk_ID: "1",
-		Jumlah: 3,
+		User_ID:   "1",
+		Produk_ID: "1",
+		Total:     3,
 	}
 
 	KeranjangRMock.Mock.On("UpdateRepository", "1", Keranjang).Return(Keranjang, nil)
@@ -234,9 +234,9 @@ func TestUpdateKeranjangController_Failure1(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		User_ID: "1",
-        Produk_ID: "1",
-		Jumlah: 3,
+		User_ID:   "1",
+		Produk_ID: "1",
+		Total:     3,
 	}
 
 	KeranjangRMock.Mock.On("UpdateRepository", "1", Keranjang).Return(Keranjang, nil)
@@ -294,9 +294,9 @@ func TestUpdateKeranjangController_Failure3(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		User_ID: "1",
-        Produk_ID: "1",
-		Jumlah: 3,
+		User_ID:   "1",
+		Produk_ID: "1",
+		Total:     3,
 	}
 
 	KeranjangRMock.Mock.On("UpdateRepository", "1", Keranjang).Return(nil, errors.New("something wrong"))
