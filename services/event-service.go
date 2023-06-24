@@ -47,7 +47,7 @@ func (e *eventService) CreateService(Event models.Event) (models.Event, error) {
 		return models.Event{}, err
 	}
 
-	return *EventR, nil
+	return EventR, nil
 }
 
 func (e *eventService) UpdateService(id string, EventBody models.Event) (*models.Event, error) {
