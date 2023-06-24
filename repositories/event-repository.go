@@ -9,7 +9,7 @@ import (
 type EventRepository interface {
 	GetEventsRepository(page int, limit int, order string, search string) ([]*models.Event, int, error)
 	GetEventRepository(id string) (*models.Event, error)
-	CreateRepository(Event models.Event) (*models.Event, error)
+	CreateRepository(Event models.Event) (models.Event, error)
 	UpdateRepository(id string, EventBody models.Event) (*models.Event, error)
 	DeleteRepository(id string) error
 }
@@ -65,12 +65,12 @@ func (e *eventRepository) GetEventRepository(id string) (*models.Event, error) {
 	return Event, nil
 }
 
-func (e *eventRepository) CreateRepository(Event models.Event) (*models.Event, error) {
+func (e *eventRepository) CreateRepository(Event models.Event) (models.Event, error) {
 	if err := e.DB.Save(&Event).Error; err != nil {
-		return nil, err
+		return models.Event{}, err
 	}
 
-	return &Event, nil
+	return Event, nil
 }
 
 func (e *eventRepository) UpdateRepository(id string, EventBody models.Event) (*models.Event, error) {

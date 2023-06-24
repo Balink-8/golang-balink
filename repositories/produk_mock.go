@@ -10,7 +10,7 @@ import (
 type ProdukRepositoryMock interface {
 	GetProduksRepository(page int, limit int, order string, search string) ([]*models.Produk, int, error)
 	GetProdukRepository(id string) (*models.Produk, error)
-	CreateRepository(Produk models.Produk) (*models.Produk, error)
+	CreateRepository(Produk models.Produk) (models.Produk, error)
 	UpdateRepository(id string, ProdukBody models.Produk) (*models.Produk, error)
 	DeleteRepository(id string) error
 }
@@ -47,15 +47,15 @@ func (a *IProdukRepositoryMock) GetProdukRepository(id string) (*models.Produk, 
 	return &Produk, nil
 }
 
-func (a *IProdukRepositoryMock) CreateRepository(ProdukData models.Produk) (*models.Produk, error) {
+func (a *IProdukRepositoryMock) CreateRepository(ProdukData models.Produk) (models.Produk, error) {
 	args := a.Mock.Called(ProdukData)
 	if args.Get(0) == nil {
-		return nil, args.Get(1).(error)
+		return models.Produk{}, args.Get(1).(error)
 	}
 
 	Produk := args.Get(0).(models.Produk)
 
-	return &Produk, nil
+	return Produk, nil
 }
 
 func (a *IProdukRepositoryMock) UpdateRepository(id string, ProdukData models.Produk) (*models.Produk, error) {

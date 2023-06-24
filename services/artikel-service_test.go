@@ -17,7 +17,7 @@ var (
 
 func TestGetArtikelService_Success(t *testing.T) {
 	Artikel := models.Artikel{
-		Judul:       "Buku 1",
+		Judul: "Buku 1",
 	}
 
 	ArtikelRMock.Mock.On("GetArtikelRepository", "1").Return(Artikel, nil)
@@ -39,7 +39,7 @@ func TestGetArtikelService_Failure(t *testing.T) {
 
 func TestCreateArtikelService_Success(t *testing.T) {
 	Artikel := models.Artikel{
-		Judul:       "Buku 1",
+		Judul: "Buku 1",
 	}
 
 	ArtikelRMock.Mock.On("CreateRepository", Artikel).Return(Artikel, nil)
@@ -53,7 +53,7 @@ func TestCreateArtikelService_Success(t *testing.T) {
 
 func TestUpdateArtikelService_Success(t *testing.T) {
 	Artikel := models.Artikel{
-		Judul:       "Buku 1",
+		Judul: "Buku 1",
 	}
 
 	ArtikelRMock.Mock.On("UpdateRepository", "1", Artikel).Return(Artikel, nil)
@@ -68,7 +68,7 @@ func TestUpdateArtikelService_Success(t *testing.T) {
 
 func TestUpdateArtikelService_Failure(t *testing.T) {
 	Artikel := models.Artikel{
-		Judul:       "Buku 1",
+		Judul: "Buku 1",
 	}
 
 	ArtikelRMock.Mock.On("UpdateRepository", "2", Artikel).Return(nil, fmt.Errorf("Artikel not found"))

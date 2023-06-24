@@ -9,7 +9,7 @@ import (
 type ProdukRepository interface {
 	GetProduksRepository(page int, limit int, order string, search string) ([]*models.Produk, int, error)
 	GetProdukRepository(id string) (*models.Produk, error)
-	CreateRepository(Produk models.Produk) (*models.Produk, error)
+	CreateRepository(Produk models.Produk) (models.Produk, error)
 	UpdateRepository(id string, ProdukBody models.Produk) (*models.Produk, error)
 	DeleteRepository(id string) error
 }
@@ -65,12 +65,12 @@ func (p *produkRepository) GetProdukRepository(id string) (*models.Produk, error
 	return Produk, nil
 }
 
-func (p *produkRepository) CreateRepository(Produk models.Produk) (*models.Produk, error) {
+func (p *produkRepository) CreateRepository(Produk models.Produk) (models.Produk, error) {
 	if err := p.DB.Save(&Produk).Error; err != nil {
-		return nil, err
+		return models.Produk{}, err
 	}
 
-	return &Produk, nil
+	return Produk, nil
 }
 
 func (p *produkRepository) UpdateRepository(id string, ProdukBody models.Produk) (*models.Produk, error) {

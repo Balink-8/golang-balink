@@ -18,10 +18,10 @@ var (
 func TestGetProdukService_Success(t *testing.T) {
 	Produk := models.Produk{
 		Kategori_ID: "1",
-        Nama: "Perhiasan",
-        Deskripsi: "Lorem Ipsum",
-		Harga: 10000,
-		Stok: 10,
+		Nama:        "Perhiasan",
+		Deskripsi:   "Lorem Ipsum",
+		Harga:       10000,
+		Stok:        10,
 	}
 
 	ProdukRMock.Mock.On("GetProdukRepository", "1").Return(Produk, nil)
@@ -48,10 +48,10 @@ func TestGetProdukService_Failure(t *testing.T) {
 func TestCreateProdukService_Success(t *testing.T) {
 	Produk := models.Produk{
 		Kategori_ID: "1",
-        Nama: "Perhiasan",
-        Deskripsi: "Lorem Ipsum",
-		Harga: 10000,
-		Stok: 10,
+		Nama:        "Perhiasan",
+		Deskripsi:   "Lorem Ipsum",
+		Harga:       10000,
+		Stok:        10,
 	}
 
 	ProdukRMock.Mock.On("CreateRepository", Produk).Return(Produk, nil)
@@ -70,10 +70,10 @@ func TestCreateProdukService_Success(t *testing.T) {
 func TestUpdateProdukService_Success(t *testing.T) {
 	Produk := models.Produk{
 		Kategori_ID: "1",
-        Nama: "Perhiasan",
-        Deskripsi: "Lorem Ipsum",
-		Harga: 10000,
-		Stok: 10,
+		Nama:        "Perhiasan",
+		Deskripsi:   "Lorem Ipsum",
+		Harga:       10000,
+		Stok:        10,
 	}
 
 	ProdukRMock.Mock.On("UpdateRepository", "1", Produk).Return(Produk, nil)
@@ -92,10 +92,10 @@ func TestUpdateProdukService_Success(t *testing.T) {
 func TestUpdateProdukService_Failure(t *testing.T) {
 	Produk := models.Produk{
 		Kategori_ID: "1",
-        Nama: "Perhiasan",
-        Deskripsi: "Lorem Ipsum",
-		Harga: 10000,
-		Stok: 10,
+		Nama:        "Perhiasan",
+		Deskripsi:   "Lorem Ipsum",
+		Harga:       10000,
+		Stok:        10,
 	}
 
 	ProdukRMock.Mock.On("UpdateRepository", "2", Produk).Return(nil, fmt.Errorf("Produk not found"))
