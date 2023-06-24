@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -103,48 +104,70 @@ func (u *userController) GetUserController(c echo.Context) error {
 }
 
 func (u *userController) CreateController(c echo.Context) error {
-	var user models.CreateUser
+	var User models.User
 
-	err := c.Bind(&user.User)
+	fmt.Println("Data :", &User)
+
+	err := c.Bind(&User)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
 	}
 
-	file, err := c.FormFile("image")
+	file, err := c.FormFile("image") // Mengubah ctx menjadi c pada bagian ini
+
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Image cannot be empty", err)
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: "Image cannot be empty", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Failed to open file", err)
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: "Failed to open file", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
 	}
 
 	re := regexp.MustCompile(`.png|.jpeg|.jpg`)
+
 	if !re.MatchString(file.Filename) {
-		return echo.NewHTTPError(http.StatusBadRequest, "The provided file format is not allowed. Please upload a JPEG or PNG image")
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: "The provided file format is not allowed. Please upload a JPEG or PNG image", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
 	}
 
-	uploadURL, err := services.NewMediaUpload().FileUpload(models.File{File: src})
+	uploadUrl, err := services.NewMediaUpload().FileUpload(models.File{File: src})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error uploading photo", err)
+		return h.Response(c, http.StatusInternalServerError, h.ResponseModel{
+			Data:    nil,
+			Message: "Error uploading photo", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
 	}
-	user.User.Image = uploadURL
+	User.Image = uploadUrl // Mengubah artikelInput menjadi Produk
 
-	createdUser, err := u.UserS.CreateService(*user.User)
+	User, err = u.UserS.CreateService(User)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
 	}
 
-	token, err := u.jwt.CreateJWTToken(createdUser.ID, createdUser.Nama)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	user.Token = token
-	return c.JSON(http.StatusOK, h.ResponseModel{
-		Data:    user,
-		Message: "Create user success",
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    User,
+		Message: "Create User success",
 		Status:  true,
 	})
 }

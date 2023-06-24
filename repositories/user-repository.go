@@ -9,7 +9,7 @@ import (
 type UserRepository interface {
 	GetUsersRepository(page int, limit int, order string, search string) ([]*models.User, int, error)
 	GetUserRepository(id string) (*models.User, error)
-	CreateRepository(user models.User) (*models.User, error)
+	CreateRepository(user models.User) (models.User, error)
 	UpdateRepository(id string, userBody models.User) (*models.User, error)
 	DeleteRepository(id string) error
 	LoginRepository(login models.User) (*models.User, error)
@@ -68,12 +68,12 @@ func (u *userRepository) GetUserRepository(id string) (*models.User, error) {
 	return &user, nil
 }
 
-func (u *userRepository) CreateRepository(user models.User) (*models.User, error) {
-	if err := u.DB.Save(&user).Error; err != nil {
-		return nil, err
+func (u *userRepository) CreateRepository(User models.User) (models.User, error) {
+	if err := u.DB.Save(&User).Error; err != nil {
+		return models.User{}, err
 	}
 
-	return &user, nil
+	return User, nil
 }
 
 func (u *userRepository) UpdateRepository(id string, userBody models.User) (*models.User, error) {
