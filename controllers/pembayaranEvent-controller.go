@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package controllers
 
 import (
@@ -76,3 +77,6 @@ func (p *pembayaranEventController) UploadBuktiPembayaranController(c echo.Conte
 		Status:  true,
 	})
 }
+=======
+package controllers
+>>>>>>> e9c008b3a413c76df853ebd85f12f1dbfcc1e083

@@ -18,5 +18,5 @@ type Event struct {
 	Tanggal_Selesai string `json:"tanggal_selesai" form:"tanggal_selesai"`
 	Lokasi          string `json:"lokasi" form:"lokasi"`
 	Link_Lokasi     string `json:"link_lokasi" form:"link_lokasi"`
-	Image           string
+	Image           string `json:"image" from:"image"`
 }
