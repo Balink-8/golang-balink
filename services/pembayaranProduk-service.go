@@ -60,7 +60,7 @@ func (pr *pembayaranProdukService) UploadBuktiPembayaran(fileHeader *multipart.F
 	}
 
 	pembayaranProduk.BuktiPembayaran = resp.SecureURL
-	pembayaranProduk.Status = "paid"
+	pembayaranProduk.Status = "Menunggu"
 	err = pr.PP.UpdateRepository(*pembayaranProduk)
 	if err != nil {
 		return
