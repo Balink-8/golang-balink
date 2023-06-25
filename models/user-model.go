@@ -11,7 +11,7 @@ type User struct {
 	Password   string `json:"password" form:"password"`
 	No_Telepon string `json:"no_telepon" form:"no_telepon"`
 	Alamat     string `json:"alamat" form:"alamat"`
-	Image      string `json:"image" from:"image"`
+	Gambar     string `json:"gambar" from:"gambar"`
 }
 
 type CreateUser struct {

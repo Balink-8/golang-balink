@@ -117,12 +117,12 @@ func (u *userController) CreateController(c echo.Context) error {
 		})
 	}
 
-	file, err := c.FormFile("image") // Mengubah ctx menjadi c pada bagian ini
+	file, err := c.FormFile("gambar") // Mengubah ctx menjadi c pada bagian ini
 
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
-			Message: "Image cannot be empty", // Mengubah pesan error menjadi string statis
+			Message: "Gambar tidak boleh kosong", // Mengubah pesan error menjadi string statis
 			Status:  false,
 		})
 	}
@@ -131,7 +131,7 @@ func (u *userController) CreateController(c echo.Context) error {
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
-			Message: "Failed to open file", // Mengubah pesan error menjadi string statis
+			Message: "Gagal membuka file", // Mengubah pesan error menjadi string statis
 			Status:  false,
 		})
 	}
@@ -141,7 +141,7 @@ func (u *userController) CreateController(c echo.Context) error {
 	if !re.MatchString(file.Filename) {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
-			Message: "The provided file format is not allowed. Please upload a JPEG or PNG image", // Mengubah pesan error menjadi string statis
+			Message: "Format file yang disediakan tidak diperbolehkan. Unggah gambar JPEG atau PNG", // Mengubah pesan error menjadi string statis
 			Status:  false,
 		})
 	}
@@ -150,11 +150,11 @@ func (u *userController) CreateController(c echo.Context) error {
 	if err != nil {
 		return h.Response(c, http.StatusInternalServerError, h.ResponseModel{
 			Data:    nil,
-			Message: "Error uploading photo", // Mengubah pesan error menjadi string statis
+			Message: "Terjadi kesalahan saat mengunggah foto", // Mengubah pesan error menjadi string statis
 			Status:  false,
 		})
 	}
-	User.Image = uploadUrl // Mengubah artikelInput menjadi Produk
+	User.Gambar = uploadUrl // Mengubah artikelInput menjadi Produk
 
 	User, err = u.UserS.CreateService(User)
 	if err != nil {
