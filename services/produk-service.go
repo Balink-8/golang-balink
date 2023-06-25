@@ -11,6 +11,7 @@ type ProdukService interface {
 	CreateService(Produk models.Produk) (*models.Produk, error)
 	UpdateService(id string, ProdukBody models.Produk) (*models.Produk, error)
 	DeleteService(id string) error
+	GetProdukByKategoriService(Kategori_ID string) ([]*models.Produk, error)
 }
 
 type produkService struct {
@@ -66,4 +67,12 @@ func (pr *produkService) DeleteService(id string) error {
 	}
 
 	return nil
+}
+
+func (p *produkService) GetProdukByKategoriService(Kategori_ID string) ([]*models.Produk, error) {
+    Produks, err := p.ProdukR.GetProdukByKategoriRepository(Kategori_ID)
+    if err != nil {
+        return nil, err
+    }
+    return Produks, nil
 }

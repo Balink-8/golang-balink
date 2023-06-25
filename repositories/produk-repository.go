@@ -12,6 +12,7 @@ type ProdukRepository interface {
 	CreateRepository(Produk models.Produk) (*models.Produk, error)
 	UpdateRepository(id string, ProdukBody models.Produk) (*models.Produk, error)
 	DeleteRepository(id string) error
+	GetProdukByKategoriRepository(Kategori_ID string) ([]*models.Produk, error)
 }
 
 type produkRepository struct {
@@ -104,4 +105,13 @@ func (p *produkRepository) DeleteRepository(id string) error {
 	}
 
 	return nil
+}
+
+func (p *produkRepository) GetProdukByKategoriRepository(Kategori_ID string) ([]*models.Produk, error) {
+    var Produks []*models.Produk
+
+    if err := p.DB.Where("Kategori_ID = ?", Kategori_ID).Find(&Produks).Error; err != nil {
+        return nil, err
+    }
+    return Produks, nil
 }
