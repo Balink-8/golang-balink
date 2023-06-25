@@ -124,7 +124,7 @@ func (a *artikelController) CreateController(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error uploading photo", err)
 	}
-	Artikel.Image = uploadURL
+	Artikel.Gambar = uploadURL
 
 	createdArtikel, err := a.ArtikelS.CreateService(Artikel)
 	if err != nil {

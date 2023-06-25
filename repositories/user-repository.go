@@ -82,17 +82,17 @@ func (u *userRepository) UpdateRepository(id string, userBody models.User) (*mod
 		return nil, err
 	}
 
-	err = u.DB.Where("ID = ?", id).Updates(models.User{Nama: userBody.Nama, Foto_Profile: userBody.Foto_Profile, Email: userBody.Email, Password: userBody.Password, No_Telepon: userBody.No_Telepon, Alamat: userBody.Alamat}).Error
+	err = u.DB.Where("ID = ?", id).Updates(models.User{Nama: userBody.Nama, Email: userBody.Email, Password: userBody.Password, No_Telepon: userBody.No_Telepon, Alamat: userBody.Alamat, Gambar: userBody.Gambar}).Error
 	if err != nil {
 		return nil, err
 	}
 
 	user.Nama = userBody.Nama
-	user.Foto_Profile = userBody.Foto_Profile
 	user.Email = userBody.Email
 	user.Password = userBody.Password
 	user.No_Telepon = userBody.No_Telepon
 	user.Alamat = userBody.Alamat
+	user.Gambar = userBody.Gambar
 
 	return user, nil
 }

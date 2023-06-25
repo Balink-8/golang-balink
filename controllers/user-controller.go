@@ -129,7 +129,7 @@ func (u *userController) CreateController(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error uploading photo", err)
 	}
-	user.User.Image = uploadURL
+	user.User.Gambar = uploadURL
 
 	createdUser, err := u.UserS.CreateService(*user.User)
 	if err != nil {

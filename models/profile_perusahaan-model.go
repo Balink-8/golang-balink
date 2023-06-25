@@ -23,7 +23,7 @@ type ProfilePerusahaan struct {
 	Rekening_BTN      string `json:"rekening_btn" form:"rekening_btn"`
 	Rekening_Seabank  string `json:"rekening_seabank" form:"rekening_seabank"`
 	Rekening_BPD_Bali string `json:"rekening_bpd_bali" form:"rekening_bpd_bali"`
-	Image             string `json:"image" from:"image"`
+	Gambar            string `json:"gambar" from:"gambar"`
 }
 
 type CreateProfilePerusahaan struct {

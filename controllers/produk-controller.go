@@ -146,7 +146,7 @@ func (p *produkController) CreateController(c echo.Context) error {
 			Status:  false,
 		})
 	}
-	Produk.Image = uploadUrl // Mengubah artikelInput menjadi Produk
+	Produk.Gambar = uploadUrl // Mengubah artikelInput menjadi Produk
 
 	Produk, err = p.ProdukS.CreateService(*Produk)
 	if err != nil {

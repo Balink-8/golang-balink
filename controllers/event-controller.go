@@ -124,7 +124,7 @@ func (e *eventController) CreateController(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error uploading photo", err)
 	}
-	Event.Image = uploadURL
+	Event.Gambar = uploadURL
 
 	createdEvent, err := e.EventS.CreateService(Event)
 	if err != nil {
