@@ -13,6 +13,7 @@ type ProdukRepositoryMock interface {
 	CreateRepository(Produk models.Produk) (*models.Produk, error)
 	UpdateRepository(id string, ProdukBody models.Produk) (*models.Produk, error)
 	DeleteRepository(id string) error
+	GetProdukByKategoriRepository(id_Kategori string) ([]*models.Produk, error)
 }
 
 type IProdukRepositoryMock struct {
@@ -76,4 +77,15 @@ func (a *IProdukRepositoryMock) DeleteRepository(id string) error {
 	}
 
 	return nil
+}
+
+func (u *IProdukRepositoryMock) GetProdukByKategoriRepository(Kategori_ID string) ([]*models.Produk, error) {
+	args := u.Mock.Called(Kategori_ID)
+	if args.Get(0) == nil {
+		return nil, args.Get(0).(error)
+	}
+
+	Produks := args.Get(0).([]*models.Produk)
+
+	return Produks, nil
 }

@@ -17,6 +17,7 @@ type ProdukController interface {
 	CreateController(c echo.Context) error
 	UpdateController(c echo.Context) error
 	DeleteController(c echo.Context) error
+	GetProdukByKategoriController(c echo.Context) error
 }
 
 type produkController struct {
@@ -189,4 +190,21 @@ func (p *produkController) DeleteController(c echo.Context) error {
 		Message: "Delete Produk success",
 		Status:  true,
 	})
+}
+
+func (p *produkController) GetProdukByKategoriController(c echo.Context) error {
+    Kategori_ID := c.Param("kategori_id")
+    Produks, err := p.ProdukS.GetProdukByKategoriService(Kategori_ID)
+    if err != nil {
+        return h.Response(c, http.StatusNotFound, h.ResponseModel{
+            Data:    nil,
+            Message: err.Error(),
+            Status:  false,
+        })
+    }
+    return h.Response(c, http.StatusOK, h.ResponseModel{
+        Data:    Produks,
+        Message: "Get Produk By Kategori success",
+        Status:  true,
+    })
 }

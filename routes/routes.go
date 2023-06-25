@@ -120,6 +120,8 @@ func New() *echo.Echo {
 
 	auth.GET("/user/:id_user/keranjang", keranjangC.GetKeranjangByUserController)
 
+	auth.GET("produk_by_kategori/:kategori_id", produkC.GetProdukByKategoriController)
+
 	auth.GET("/web_dashboard", dashboardC.GetDashboardController)
 
 	return e
