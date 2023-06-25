@@ -79,12 +79,6 @@ func (a *artikelRepository) UpdateRepository(id string, ArtikelBody models.Artik
 		return nil, err
 	}
 
-	err = a.DB.Where("ID = ?", id).Updates(models.Artikel{Gambar: ArtikelBody.Gambar, Judul: ArtikelBody.Judul, Deskripsi: ArtikelBody.Deskripsi}).Error
-	if err != nil {
-		return nil, err
-	}
-
-	Artikel.Gambar = ArtikelBody.Gambar
 	Artikel.Judul = ArtikelBody.Judul
 	Artikel.Deskripsi = ArtikelBody.Deskripsi
 

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"regexp"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -98,42 +97,29 @@ func (k *kategoriProdukController) GetKategoriProdukController(c echo.Context) e
 }
 
 func (k *kategoriProdukController) CreateController(c echo.Context) error {
-	var kategoriProduk models.KategoriProduk
+	var KategoriProduk *models.KategoriProduk
 
-	err := c.Bind(&kategoriProduk)
+	err := c.Bind(&KategoriProduk)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
 	}
 
-	file, err := c.FormFile("image")
+	KategoriProduk, err = k.KategoriProdukS.CreateService(*KategoriProduk)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Image cannot be empty", err)
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
 	}
 
-	src, err := file.Open()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Failed to open file", err)
-	}
-
-	re := regexp.MustCompile(`.png|.jpeg|.jpg`)
-	if !re.MatchString(file.Filename) {
-		return echo.NewHTTPError(http.StatusBadRequest, "The provided file format is not allowed. Please upload a JPEG or PNG image")
-	}
-
-	uploadURL, err := services.NewMediaUpload().FileUpload(models.File{File: src})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error uploading photo", err)
-	}
-	kategoriProduk.Image = uploadURL
-
-	createdKategoriProduk, err := k.KategoriProdukS.CreateService(kategoriProduk)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, h.ResponseModel{
-		Data:    createdKategoriProduk,
-		Message: "Create Kategori Produk success",
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    KategoriProduk,
+		Message: "Create KategoriProduk success",
 		Status:  true,
 	})
 }

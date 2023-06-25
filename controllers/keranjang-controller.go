@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
-	"regexp"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -99,12 +97,10 @@ func (k *keranjangController) GetKeranjangController(c echo.Context) error {
 	})
 }
 
-func (K *keranjangController) CreateController(c echo.Context) error {
-	var keranjang models.Keranjang
+func (k *keranjangController) CreateController(c echo.Context) error {
+	var Keranjang *models.Keranjang
 
-	fmt.Println("Data :", &keranjang)
-
-	err := c.Bind(&keranjang)
+	err := c.Bind(&Keranjang)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -113,46 +109,7 @@ func (K *keranjangController) CreateController(c echo.Context) error {
 		})
 	}
 
-	file, err := c.FormFile("image") // Mengubah ctx menjadi c pada bagian ini
-
-	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: "Image cannot be empty", // Mengubah pesan error menjadi string statis
-			Status:  false,
-		})
-	}
-
-	src, err := file.Open()
-	if err != nil {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: "Failed to open file", // Mengubah pesan error menjadi string statis
-			Status:  false,
-		})
-	}
-
-	re := regexp.MustCompile(`.png|.jpeg|.jpg`)
-
-	if !re.MatchString(file.Filename) {
-		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
-			Data:    nil,
-			Message: "The provided file format is not allowed. Please upload a JPEG or PNG image", // Mengubah pesan error menjadi string statis
-			Status:  false,
-		})
-	}
-
-	uploadUrl, err := services.NewMediaUpload().FileUpload(models.File{File: src})
-	if err != nil {
-		return h.Response(c, http.StatusInternalServerError, h.ResponseModel{
-			Data:    nil,
-			Message: "Error uploading photo", // Mengubah pesan error menjadi string statis
-			Status:  false,
-		})
-	}
-	keranjang.Image = uploadUrl // Mengubah artikelInput menjadi Produk
-
-	keranjang, err = K.KeranjangS.CreateService(keranjang)
+	Keranjang, err = k.KeranjangS.CreateService(*Keranjang)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,
@@ -162,8 +119,8 @@ func (K *keranjangController) CreateController(c echo.Context) error {
 	}
 
 	return h.Response(c, http.StatusOK, h.ResponseModel{
-		Data:    keranjang,
-		Message: "Create Artikel success",
+		Data:    Keranjang,
+		Message: "Create Keranjang success",
 		Status:  true,
 	})
 }

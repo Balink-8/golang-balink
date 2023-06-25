@@ -79,13 +79,7 @@ func (e *eventRepository) UpdateRepository(id string, EventBody models.Event) (*
 		return nil, err
 	}
 
-	err = e.DB.Where("ID = ?", id).Updates(models.Event{Artikel_ID: EventBody.Artikel_ID, Gambar: EventBody.Gambar, Nama: EventBody.Nama, Deskripsi: EventBody.Deskripsi, Stok_Tiket: EventBody.Stok_Tiket, Harga_Tiket: EventBody.Harga_Tiket, Waktu_Mulai: EventBody.Waktu_Mulai, Waktu_Selesai: EventBody.Waktu_Selesai, Tanggal_Mulai: EventBody.Tanggal_Mulai, Tanggal_Selesai: EventBody.Tanggal_Selesai, Lokasi: EventBody.Lokasi, Link_Lokasi: EventBody.Link_Lokasi}).Error
-	if err != nil {
-		return nil, err
-	}
-
 	Event.Artikel_ID = EventBody.Artikel_ID
-	Event.Gambar = EventBody.Gambar
 	Event.Nama = EventBody.Nama
 	Event.Deskripsi = EventBody.Deskripsi
 	Event.Stok_Tiket = EventBody.Stok_Tiket

@@ -7,7 +7,6 @@ import (
 type Event struct {
 	gorm.Model
 	Artikel_ID      string `json:"artikel_id" form:"artikel_id"`
-	Gambar          string `json:"gambar" form:"gambar"`
 	Nama            string `json:"nama" form:"nama"`
 	Deskripsi       string `json:"deskripsi" form:"deskripsi"`
 	Harga_Tiket     int64  `json:"harga_tiket" form:"harga_tiket"`
