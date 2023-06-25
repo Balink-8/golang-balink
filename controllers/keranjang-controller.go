@@ -99,41 +99,28 @@ func (k *keranjangController) GetKeranjangController(c echo.Context) error {
 }
 
 func (k *keranjangController) CreateController(c echo.Context) error {
-	var Keranjang models.Keranjang
+	var Keranjang *models.Keranjang
 
 	err := c.Bind(&Keranjang)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
 	}
 
-	file, err := c.FormFile("image")
+	Keranjang, err = k.KeranjangS.CreateService(*Keranjang)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Image cannot be empty", err)
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
 	}
 
-	src, err := file.Open()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Failed to open file", err)
-	}
-
-	re := regexp.MustCompile(`.png|.jpeg|.jpg`)
-	if !re.MatchString(file.Filename) {
-		return echo.NewHTTPError(http.StatusBadRequest, "The provided file format is not allowed. Please upload a JPEG or PNG image")
-	}
-
-	uploadURL, err := services.NewMediaUpload().FileUpload(models.File{File: src})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error uploading photo", err)
-	}
-	Keranjang.Image = uploadURL
-
-	createdKeranjang, err := k.KeranjangS.CreateService(Keranjang)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, h.ResponseModel{
-		Data:    createdKeranjang,
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    Keranjang,
 		Message: "Create Keranjang success",
 		Status:  true,
 	})
