@@ -6,5 +6,5 @@ type Artikel struct {
 	gorm.Model
 	Judul     string `json:"judul" form:"judul"`
 	Deskripsi string `json:"deskripsi" form:"deskripsi"`
-	Gambar       string `json:"gambar" from:"gambar"`
+	Image       string `json:"image" from:"image"`
 }

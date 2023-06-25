@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -100,39 +101,67 @@ func (e *eventController) GetEventController(c echo.Context) error {
 func (e *eventController) CreateController(c echo.Context) error {
 	var Event models.Event
 
+	fmt.Println("Data :", &Event)
+
 	err := c.Bind(&Event)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
 	}
 
-	file, err := c.FormFile("image")
+	file, err := c.FormFile("gambar") // Mengubah ctx menjadi c pada bagian ini
+
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Image cannot be empty", err)
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: "Gambar tidak boleh kosong", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Failed to open file", err)
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: "Gagal membuka file", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
 	}
 
 	re := regexp.MustCompile(`.png|.jpeg|.jpg`)
+
 	if !re.MatchString(file.Filename) {
-		return echo.NewHTTPError(http.StatusBadRequest, "The provided file format is not allowed. Please upload a JPEG or PNG image")
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: "Format file yang disediakan tidak diperbolehkan. Unggah gambar JPEG atau PNGe", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
 	}
 
-	uploadURL, err := services.NewMediaUpload().FileUpload(models.File{File: src})
+	uploadUrl, err := services.NewMediaUpload().FileUpload(models.File{File: src})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error uploading photo", err)
+		return h.Response(c, http.StatusInternalServerError, h.ResponseModel{
+			Data:    nil,
+			Message: "Terjadi kesalahan saat mengunggah foto", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
 	}
-	Event.Gambar = uploadURL
+	Event.Image = uploadUrl // Mengubah artikelInput menjadi Produk
 
-	createdEvent, err := e.EventS.CreateService(Event)
+	Event, err = e.EventS.CreateService(Event)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
 	}
 
-	return c.JSON(http.StatusOK, h.ResponseModel{
-		Data:    createdEvent,
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    Event,
 		Message: "Create Event success",
 		Status:  true,
 	})

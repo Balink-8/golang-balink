@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -97,42 +98,70 @@ func (a *artikelController) GetArtikelController(c echo.Context) error {
 	})
 }
 
-func (a *artikelController) CreateController(c echo.Context) error {
+func (p *artikelController) CreateController(c echo.Context) error {
 	var Artikel models.Artikel
+
+	fmt.Println("Data :", &Artikel)
 
 	err := c.Bind(&Artikel)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
 	}
 
-	file, err := c.FormFile("image")
+	file, err := c.FormFile("image") // Mengubah ctx menjadi c pada bagian ini
+
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Image cannot be empty", err)
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: "Image cannot be empty", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Failed to open file", err)
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: "Failed to open file", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
 	}
 
 	re := regexp.MustCompile(`.png|.jpeg|.jpg`)
+
 	if !re.MatchString(file.Filename) {
-		return echo.NewHTTPError(http.StatusBadRequest, "The provided file format is not allowed. Please upload a JPEG or PNG image")
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: "The provided file format is not allowed. Please upload a JPEG or PNG image", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
 	}
 
-	uploadURL, err := services.NewMediaUpload().FileUpload(models.File{File: src})
+	uploadUrl, err := services.NewMediaUpload().FileUpload(models.File{File: src})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error uploading photo", err)
+		return h.Response(c, http.StatusInternalServerError, h.ResponseModel{
+			Data:    nil,
+			Message: "Error uploading photo", // Mengubah pesan error menjadi string statis
+			Status:  false,
+		})
 	}
-	Artikel.Gambar = uploadURL
+	Artikel.Image = uploadUrl // Mengubah artikelInput menjadi Produk
 
-	createdArtikel, err := a.ArtikelS.CreateService(Artikel)
+	Artikel, err = p.ArtikelS.CreateService(Artikel)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+			Data:    nil,
+			Message: err.Error(),
+			Status:  false,
+		})
 	}
 
-	return c.JSON(http.StatusOK, h.ResponseModel{
-		Data:    createdArtikel,
+	return h.Response(c, http.StatusOK, h.ResponseModel{
+		Data:    Artikel,
 		Message: "Create Artikel success",
 		Status:  true,
 	})

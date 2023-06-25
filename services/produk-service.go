@@ -8,7 +8,7 @@ import (
 type ProdukService interface {
 	GetProduksService(page int, limit int, order string, search string) ([]*models.Produk, int, error)
 	GetProdukService(id string) (*models.Produk, error)
-	CreateService(Produk models.Produk) (*models.Produk, error)
+	CreateService(Produk models.Produk) (models.Produk, error)
 	UpdateService(id string, ProdukBody models.Produk) (*models.Produk, error)
 	DeleteService(id string) error
 }
@@ -41,10 +41,10 @@ func (pr *produkService) GetProdukService(id string) (*models.Produk, error) {
 	return Produk, nil
 }
 
-func (pr *produkService) CreateService(Produk models.Produk) (*models.Produk, error) {
+func (pr *produkService) CreateService(Produk models.Produk) (models.Produk, error) {
 	ProdukR, err := pr.ProdukR.CreateRepository(Produk)
 	if err != nil {
-		return nil, err
+		return models.Produk{}, err
 	}
 
 	return ProdukR, nil

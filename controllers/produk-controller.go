@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -98,7 +99,9 @@ func (p *produkController) GetProdukController(c echo.Context) error {
 }
 
 func (p *produkController) CreateController(c echo.Context) error {
-	var Produk *models.Produk
+	var Produk models.Produk
+
+	fmt.Println("Data :", &Produk)
 
 	err := c.Bind(&Produk)
 	if err != nil {
@@ -146,9 +149,9 @@ func (p *produkController) CreateController(c echo.Context) error {
 			Status:  false,
 		})
 	}
-	Produk.Gambar = uploadUrl // Mengubah artikelInput menjadi Produk
+	Produk.Image = uploadUrl // Mengubah artikelInput menjadi Produk
 
-	Produk, err = p.ProdukS.CreateService(*Produk)
+	Produk, err = p.ProdukS.CreateService(Produk)
 	if err != nil {
 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
 			Data:    nil,

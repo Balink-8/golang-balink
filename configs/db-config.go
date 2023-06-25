@@ -75,7 +75,8 @@ func InitialMigration(db *gorm.DB) {
 	db.AutoMigrate(&models.Promo{})
 	db.AutoMigrate(&models.ProfilePerusahaan{})
 	db.AutoMigrate(&models.MetodePembayaran{})
-	db.AutoMigrate(&models.PembayaranProduk{}, &models.PembayaranEvent{},)
+	db.AutoMigrate(&models.PembayaranProduk{})
+	db.AutoMigrate(&models.PembayaranEvent{})
 
 }
 

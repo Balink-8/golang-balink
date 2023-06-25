@@ -11,5 +11,5 @@ type Produk struct {
 	Deskripsi   string `json:"deskripsi" form:"deskripsi"`
 	Harga       int64  `json:"harga" form:"harga"`
 	Stok        int64  `json:"stok" form:"stok"`
-	Gambar      string `json:"gambar" from:"gambar"`
+	Image       string `json:"image" from:"image"`
 }

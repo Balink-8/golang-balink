@@ -9,7 +9,7 @@ import (
 type ArtikelRepository interface {
 	GetArtikelsRepository(page int, limit int, order string, search string) ([]*models.Artikel, int, error)
 	GetArtikelRepository(id string) (*models.Artikel, error)
-	CreateRepository(Artikel models.Artikel) (*models.Artikel, error)
+	CreateRepository(Artikel models.Artikel) (models.Artikel, error)
 	UpdateRepository(id string, ArtikelBody models.Artikel) (*models.Artikel, error)
 	DeleteRepository(id string) error
 }
@@ -65,12 +65,12 @@ func (a *artikelRepository) GetArtikelRepository(id string) (*models.Artikel, er
 	return Artikel, nil
 }
 
-func (a *artikelRepository) CreateRepository(Artikel models.Artikel) (*models.Artikel, error) {
+func (a *artikelRepository) CreateRepository(Artikel models.Artikel) (models.Artikel, error) {
 	if err := a.DB.Save(&Artikel).Error; err != nil {
-		return nil, err
+		return models.Artikel{}, err
 	}
 
-	return &Artikel, nil
+	return Artikel, nil
 }
 
 func (a *artikelRepository) UpdateRepository(id string, ArtikelBody models.Artikel) (*models.Artikel, error) {
@@ -79,12 +79,6 @@ func (a *artikelRepository) UpdateRepository(id string, ArtikelBody models.Artik
 		return nil, err
 	}
 
-	err = a.DB.Where("ID = ?", id).Updates(models.Artikel{Gambar: ArtikelBody.Gambar, Judul: ArtikelBody.Judul, Deskripsi: ArtikelBody.Deskripsi}).Error
-	if err != nil {
-		return nil, err
-	}
-
-	Artikel.Gambar = ArtikelBody.Gambar
 	Artikel.Judul = ArtikelBody.Judul
 	Artikel.Deskripsi = ArtikelBody.Deskripsi
 

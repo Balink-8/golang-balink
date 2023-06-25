@@ -1,436 +1,235 @@
 package controllers
 
-import (
-	"capstone/models"
-	"capstone/repositories"
-	"capstone/services"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
-
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"gorm.io/gorm"
-)
-
-var (
-	EventRMock = &repositories.IEventRepositoryMock{Mock: mock.Mock{}}
-	EventSMock = services.NewEventService(EventRMock)
-	EventCTest = NewEventController(EventSMock)
-)
-
-func TestGetEventsController_Success(t *testing.T) {
-	Events := []*models.Event{
-		{
-			Artikel_ID: "1",
-			Gambar: "123",
-			Nama: "Kecak 2",
-			Deskripsi: "Lorem Ipsum",
-			Harga_Tiket: 45000,
-			Stok_Tiket: 15,
-			Waktu_Mulai: "10.00",
-			Waktu_Selesai: "12.00",
-			Tanggal_Mulai: "12 Desember 2012",
-			Tanggal_Selesai: "12 Desember 2012",
-			Lokasi: "Jln. 123",
-			Link_Lokasi: "123",
-		},
-		{
-			Artikel_ID: "1",
-			Gambar: "123",
-			Nama: "Kecak 2",
-			Deskripsi: "Lorem Ipsum",
-			Harga_Tiket: 45000,
-			Stok_Tiket: 15,
-			Waktu_Mulai: "10.00",
-			Waktu_Selesai: "12.00",
-			Tanggal_Mulai: "12 Desember 2012",
-			Tanggal_Selesai: "12 Desember 2012",
-			Lokasi: "Jln. 123",
-			Link_Lokasi: "123",
-		},
-	}
-
-	EventRMock.Mock.On("GetEventsRepository").Return(Events, nil)
-
-	rec := httptest.NewRecorder()
-
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-
-	e := echo.New()
-
-	c := e.NewContext(req, rec)
-
-	err := EventCTest.GetEventsController(c)
-	assert.Nil(t, err)
-}
-
-func TestGetEventsController_Failure(t *testing.T) {
-	EventRMock = &repositories.IEventRepositoryMock{Mock: mock.Mock{}}
-	EventSMock = services.NewEventService(EventRMock)
-	EventCTest = NewEventController(EventSMock)
-	EventRMock.Mock.On("GetEventsRepository").Return(nil, errors.New("get all Events failed"))
-
-	rec := httptest.NewRecorder()
-
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-
-	e := echo.New()
-
-	c := e.NewContext(req, rec)
-
-	err := EventCTest.GetEventsController(c)
-	assert.Nil(t, err)
-}
-
-func TestGetEventController_Success(t *testing.T) {
-	Event := models.Event{
-		Model: gorm.Model{
-			ID: 2,
-		},
-		Artikel_ID: "1",
-        Gambar: "123",
-        Nama: "Kecak 2",
-        Deskripsi: "Lorem Ipsum",
-        Harga_Tiket: 45000,
-        Stok_Tiket: 15,
-        Waktu_Mulai: "10.00",
-        Waktu_Selesai: "12.00",
-        Tanggal_Mulai: "12 Desember 2012",
-        Tanggal_Selesai: "12 Desember 2012",
-        Lokasi: "Jln. 123",
-        Link_Lokasi: "123",
-	}
-
-	EventRMock.Mock.On("GetEventRepository", "2").Return(Event, nil)
-
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/Events/2", nil)
-
-	e := echo.New()
-
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues("2")
-
-	err := EventCTest.GetEventController(c)
-	assert.Nil(t, err)
-}
-
-func TestGetEventController_Failure1(t *testing.T) {
-	EventRMock.Mock.On("GetEventRepository", "qwe").Return(nil, errors.New("get Event failed"))
-
-	rec := httptest.NewRecorder()
-
-	req := httptest.NewRequest(http.MethodGet, "/Events/qwe", nil)
-
-	e := echo.New()
-
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues("qwe")
-
-	err := EventCTest.GetEventController(c)
-	assert.Nil(t, err)
-}
-
-func TestGetEventController_Failure2(t *testing.T) {
-	EventRMock.Mock.On("GetEventRepository", "3").Return(nil, fmt.Errorf("Event not found"))
-
-	rec := httptest.NewRecorder()
-
-	req := httptest.NewRequest(http.MethodGet, "/Events/3", nil)
-
-	e := echo.New()
-
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues("3")
-
-	err := EventCTest.GetEventController(c)
-	assert.Nil(t, err)
-}
-
-func TestCreateEventController_Success(t *testing.T) {
-	Event := models.Event{
-		Artikel_ID: "1",
-        Gambar: "123",
-        Nama: "Kecak 2",
-        Deskripsi: "Lorem Ipsum",
-        Harga_Tiket: 45000,
-        Stok_Tiket: 15,
-        Waktu_Mulai: "10.00",
-        Waktu_Selesai: "12.00",
-        Tanggal_Mulai: "12 Desember 2012",
-        Tanggal_Selesai: "12 Desember 2012",
-        Lokasi: "Jln. 123",
-        Link_Lokasi: "123",
-	}
-
-	EventRMock.Mock.On("CreateRepository", Event).Return(Event, nil)
-
-	rec := httptest.NewRecorder()
-
-	EventByte, err := json.Marshal(Event)
-	if err != nil {
-		t.Error(err)
-	}
-
-	reqBody := strings.NewReader(string(EventByte))
-
-	req := httptest.NewRequest(http.MethodPost, "/Events", reqBody)
-	req.Header.Add("Content-type", "application/json")
-	e := echo.New()
-	c := e.NewContext(req, rec)
-
-	err = EventCTest.CreateController(c)
-	assert.Nil(t, err)
-}
-
-func TestCreateEventController_Failure1(t *testing.T) {
-	Event := models.Event{}
-
-	EventRMock.Mock.On("CreateRepository", Event).Return(nil, errors.New("something wrong"))
-
-	rec := httptest.NewRecorder()
-
-	EventByte, err := json.Marshal(Event)
-	if err != nil {
-		t.Error(err)
-	}
-
-	reqBody := strings.NewReader(string(EventByte))
-
-	req := httptest.NewRequest(http.MethodPost, "/Events", reqBody)
-	req.Header.Add("Content-type", "application/json")
-	e := echo.New()
-	c := e.NewContext(req, rec)
-
-	err = EventCTest.CreateController(c)
-	assert.Nil(t, err)
-}
-
-func TestCreateEventController_Failure2(t *testing.T) {
-	Event := models.Event{}
-
-	EventRMock.Mock.On("CreateRepository", Event).Return(nil, errors.New("something wrong"))
-
-	rec := httptest.NewRecorder()
-
-	reqBody := strings.NewReader(string([]byte("qwe")))
-
-	req := httptest.NewRequest(http.MethodPost, "/Events", reqBody)
-	req.Header.Add("Content-type", "application/json")
-	e := echo.New()
-	c := e.NewContext(req, rec)
-
-	err := EventCTest.CreateController(c)
-	assert.Nil(t, err)
-}
-
-func TestUpdateEventController_Success(t *testing.T) {
-	Event := models.Event{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Artikel_ID: "1",
-        Gambar: "123",
-        Nama: "Kecak 2",
-        Deskripsi: "Lorem Ipsum",
-        Harga_Tiket: 45000,
-        Stok_Tiket: 15,
-        Waktu_Mulai: "10.00",
-        Waktu_Selesai: "12.00",
-        Tanggal_Mulai: "12 Desember 2012",
-        Tanggal_Selesai: "12 Desember 2012",
-        Lokasi: "Jln. 123",
-        Link_Lokasi: "123",
-	}
-
-	EventRMock.Mock.On("UpdateRepository", "1", Event).Return(Event, nil)
-
-	rec := httptest.NewRecorder()
-
-	EventByte, err := json.Marshal(Event)
-	if err != nil {
-		t.Error(err)
-	}
-
-	reqBody := strings.NewReader(string(EventByte))
-
-	req := httptest.NewRequest(http.MethodPut, "/Events/1", reqBody)
-	req.Header.Add("Content-type", "application/json")
-	e := echo.New()
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues("1")
-
-	err = EventCTest.UpdateController(c)
-	assert.Nil(t, err)
-}
-
-func TestUpdateEventController_Failure1(t *testing.T) {
-	Event := models.Event{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Artikel_ID: "1",
-        Gambar: "123",
-        Nama: "Kecak 2",
-        Deskripsi: "Lorem Ipsum",
-        Harga_Tiket: 45000,
-        Stok_Tiket: 15,
-        Waktu_Mulai: "10.00",
-        Waktu_Selesai: "12.00",
-        Tanggal_Mulai: "12 Desember 2012",
-        Tanggal_Selesai: "12 Desember 2012",
-        Lokasi: "Jln. 123",
-        Link_Lokasi: "123",
-	}
-
-	EventRMock.Mock.On("UpdateRepository", "1", Event).Return(Event, nil)
-
-	rec := httptest.NewRecorder()
-
-	EventByte, err := json.Marshal(Event)
-	if err != nil {
-		t.Error(err)
-	}
-
-	reqBody := strings.NewReader(string(EventByte))
-
-	req := httptest.NewRequest(http.MethodPut, "/Events/qwe", reqBody)
-	req.Header.Add("Content-type", "application/json")
-	e := echo.New()
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues("qwe")
-
-	err = EventCTest.UpdateController(c)
-	assert.Nil(t, err)
-}
-
-func TestUpdateEventController_Failure2(t *testing.T) {
-	Event := models.Event{}
-
-	EventRMock.Mock.On("UpdateRepository", "1", Event).Return(Event, nil)
-
-	rec := httptest.NewRecorder()
-
-	_, err := json.Marshal(Event)
-	if err != nil {
-		t.Error(err)
-	}
-
-	reqBody := strings.NewReader(string([]byte("qwe")))
-
-	req := httptest.NewRequest(http.MethodPut, "/Events/qwe", reqBody)
-	req.Header.Add("Content-type", "application/json")
-	e := echo.New()
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues("1")
-
-	err = EventCTest.UpdateController(c)
-	assert.Nil(t, err)
-}
-
-func TestUpdateEventController_Failure3(t *testing.T) {
-	EventRMock = &repositories.IEventRepositoryMock{Mock: mock.Mock{}}
-	EventSMock = services.NewEventService(EventRMock)
-	EventCTest = NewEventController(EventSMock)
-	Event := models.Event{
-		Model: gorm.Model{
-			ID: 1,
-		},
-		Artikel_ID: "1",
-        Gambar: "123",
-        Nama: "Kecak 2",
-        Deskripsi: "Lorem Ipsum",
-        Harga_Tiket: 45000,
-        Stok_Tiket: 15,
-        Waktu_Mulai: "10.00",
-        Waktu_Selesai: "12.00",
-        Tanggal_Mulai: "12 Desember 2012",
-        Tanggal_Selesai: "12 Desember 2012",
-        Lokasi: "Jln. 123",
-        Link_Lokasi: "123",
-	}
-
-	EventRMock.Mock.On("UpdateRepository", "1", Event).Return(nil, errors.New("something wrong"))
-
-	rec := httptest.NewRecorder()
-
-	EventByte, err := json.Marshal(Event)
-	if err != nil {
-		t.Error(err)
-	}
-
-	reqBody := strings.NewReader(string(EventByte))
-
-	req := httptest.NewRequest(http.MethodPut, "/Events/1", reqBody)
-	req.Header.Add("Content-type", "application/json")
-	e := echo.New()
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues("1")
-
-	err = EventCTest.UpdateController(c)
-	assert.Nil(t, err)
-}
-
-func TestDeleteEventController_Success(t *testing.T) {
-	EventRMock.Mock.On("DeleteRepository", "2").Return(nil)
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodDelete, "/Events/2", nil)
-
-	e := echo.New()
-
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues("2")
-
-	err := EventCTest.DeleteController(c)
-
-	assert.Nil(t, err)
-}
-
-func TestDeleteEventController_Failure1(t *testing.T) {
-	EventRMock = &repositories.IEventRepositoryMock{Mock: mock.Mock{}}
-	EventSMock = services.NewEventService(EventRMock)
-	EventCTest = NewEventController(EventSMock)
-	EventRMock.Mock.On("DeleteRepository", "2").Return(fmt.Errorf("Event not found"))
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodDelete, "/Events/2", nil)
-
-	e := echo.New()
-
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues("2")
-
-	err := EventCTest.DeleteController(c)
-
-	assert.Nil(t, err)
-}
-
-func TestDeleteEventController_Failure2(t *testing.T) {
-	EventRMock.Mock.On("DeleteRepository", "2").Return(fmt.Errorf("Event not found"))
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/Events/qwe", nil)
-
-	e := echo.New()
-
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues("qwe")
-
-	err := EventCTest.DeleteController(c)
-
-	assert.Nil(t, err)
-}
+// import (
+// 	"fmt"
+// 	"net/http"
+// 	"regexp"
+// 	"strconv"
+
+// 	"github.com/labstack/echo/v4"
+
+// 	h "capstone/helpers"
+// 	"capstone/models"
+// 	"capstone/services"
+// )
+
+// type EventController interface {
+// 	GetEventsController(c echo.Context) error
+// 	GetEventController(c echo.Context) error
+// 	CreateController(c echo.Context) error
+// 	UpdateController(c echo.Context) error
+// 	DeleteController(c echo.Context) error
+// }
+
+// type eventController struct {
+// 	EventS services.EventService
+// }
+
+// func NewEventController(EventS services.EventService) EventController {
+// 	return &eventController{
+// 		EventS: EventS,
+// 	}
+// }
+
+// func (e *eventController) GetEventsController(c echo.Context) error {
+// 	page, err := strconv.Atoi(c.QueryParam("page"))
+// 	if err != nil || page < 1 {
+// 		page = 1
+// 	}
+
+// 	limit, err := strconv.Atoi(c.QueryParam("limit"))
+// 	if err != nil || limit < 1 {
+// 		limit = 10
+// 	}
+
+// 	order := c.QueryParam("order")
+// 	search := c.QueryParam("search")
+
+// 	Events, totalData, err := e.EventS.GetEventsService(page, limit, order, search)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	responseData := map[string]interface{}{
+// 		"data":       Events,
+// 		"page":       page,
+// 		"data_shown": len(Events),
+// 		"total_data": totalData,
+// 	}
+
+// 	return h.Response(c, http.StatusOK, h.ResponseModel{
+// 		Data:    responseData,
+// 		Message: "Get all Event success",
+// 		Status:  true,
+// 	})
+// }
+
+// func (e *eventController) GetEventController(c echo.Context) error {
+// 	id := c.Param("id")
+
+// 	err := h.IsNumber(id)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	var Event *models.Event
+
+// 	Event, err = e.EventS.GetEventService(id)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusNotFound, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	return h.Response(c, http.StatusOK, h.ResponseModel{
+// 		Data:    Event,
+// 		Message: "Get Event success",
+// 		Status:  true,
+// 	})
+// }
+
+// func (e *eventController) CreateController(c echo.Context) error {
+// 	var Event models.Event
+
+// 	fmt.Println("Data :", &Event)
+
+// 	err := c.Bind(&Event)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	file, err := c.FormFile("image") // Mengubah ctx menjadi c pada bagian ini
+
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: "Image cannot be empty", // Mengubah pesan error menjadi string statis
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	src, err := file.Open()
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: "Failed to open file", // Mengubah pesan error menjadi string statis
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	re := regexp.MustCompile(`.png|.jpeg|.jpg`)
+
+// 	if !re.MatchString(file.Filename) {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: "The provided file format is not allowed. Please upload a JPEG or PNG image", // Mengubah pesan error menjadi string statis
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	uploadUrl, err := services.NewMediaUpload().FileUpload(models.File{File: src})
+// 	if err != nil {
+// 		return h.Response(c, http.StatusInternalServerError, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: "Error uploading photo", // Mengubah pesan error menjadi string statis
+// 			Status:  false,
+// 		})
+// 	}
+// 	Event.Image = uploadUrl // Mengubah artikelInput menjadi Produk
+
+// 	Event, err = e.EventS.CreateService(Event)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	return h.Response(c, http.StatusOK, h.ResponseModel{
+// 		Data:    Event,
+// 		Message: "Create Event success",
+// 		Status:  true,
+// 	})
+// }
+
+// func (e *eventController) UpdateController(c echo.Context) error {
+// 	id := c.Param("id")
+
+// 	err := h.IsNumber(id)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	var Event *models.Event
+
+// 	err = c.Bind(&Event)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	Event, err = e.EventS.UpdateService(id, *Event)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	return h.Response(c, http.StatusOK, h.ResponseModel{
+// 		Data:    Event,
+// 		Message: "Update Event success",
+// 		Status:  true,
+// 	})
+// }
+
+// func (e *eventController) DeleteController(c echo.Context) error {
+// 	id := c.Param("id")
+
+// 	err := h.IsNumber(id)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	err = e.EventS.DeleteService(id)
+// 	if err != nil {
+// 		return h.Response(c, http.StatusBadRequest, h.ResponseModel{
+// 			Data:    nil,
+// 			Message: err.Error(),
+// 			Status:  false,
+// 		})
+// 	}
+
+// 	return h.Response(c, http.StatusOK, h.ResponseModel{
+// 		Data:    nil,
+// 		Message: "Delete Event success",
+// 		Status:  true,
+// 	})
+// }

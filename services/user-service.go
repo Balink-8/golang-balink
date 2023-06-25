@@ -9,7 +9,7 @@ import (
 type UserService interface {
 	GetUsersService(page int, limit int, order string, search string) ([]*models.User, int, error)
 	GetUserService(id string) (*models.User, error)
-	CreateService(user models.User) (*models.User, error)
+	CreateService(user models.User) (models.User, error)
 	UpdateService(id string, userBody models.User) (*models.User, error)
 	DeleteService(id string) error
 	LoginService(login models.User) (*models.User, error)
@@ -44,10 +44,10 @@ func (u *userService) GetUserService(id string) (*models.User, error) {
 	return user, nil
 }
 
-func (u *userService) CreateService(user models.User) (*models.User, error) {
-	UserR, err := u.UserR.CreateRepository(user)
+func (u *userService) CreateService(User models.User) (models.User, error) {
+	UserR, err := u.UserR.CreateRepository(User)
 	if err != nil {
-		return nil, err
+		return models.User{}, err
 	}
 
 	return UserR, nil
