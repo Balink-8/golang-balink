@@ -19,14 +19,14 @@ type PembayaranEventService interface {
 
 type pembayaranEventService struct {
 	PP      repositories.PembayaranEventRepository
-	K       repositories.KeranjangRepository
+	E       repositories.EventRepository
 	payment repositories.PaymentMethodRepository
 }
 
-func NewPembayaranEventService(PP repositories.PembayaranEventRepository, K repositories.KeranjangRepository, payment repositories.PaymentMethodRepository) PembayaranEventService {
+func NewPembayaranEventService(PP repositories.PembayaranEventRepository, E repositories.EventRepository, payment repositories.PaymentMethodRepository) PembayaranEventService {
 	return &pembayaranEventService{
 		PP:      PP,
-		K:       K,
+		E:       E,
 		payment: payment,
 	}
 
@@ -71,7 +71,7 @@ func (pr *pembayaranEventService) UploadBuktiPembayaran(fileHeader *multipart.Fi
 
 func (pr *pembayaranEventService) CreateService(PembayaranEvent models.PembayaranEvent) (*models.PembayaranEvent, error) {
 
-	keranjang, err := pr.K.GetKeranjangRepository(PembayaranEvent.KeranjangID)
+	event, err := pr.E.GetEventRepository(PembayaranEvent.EventID)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,10 @@ func (pr *pembayaranEventService) CreateService(PembayaranEvent models.Pembayara
 	}
 
 	payload := models.PembayaranEvent{
-		KeranjangTiket:   *keranjang,
+		UserID:           PembayaranEvent.UserID,
+		Event:            *event,
+		Qty: 			  PembayaranEvent.Qty,
+		Total: 			  int(event.Harga_Tiket) * PembayaranEvent.Qty,
 		Status:           `unpaid`,
 		PromoID:          PembayaranEvent.PromoID,
 		MetodePembayaran: *payment,

@@ -18,12 +18,14 @@ type KeranjangService interface {
 type keranjangService struct {
 	KeranjangR repositories.KeranjangRepository
 	ProdukR    repositories.ProdukRepository
+	EventR     repositories.EventRepository
 }
 
-func NewKeranjangService(KeranjangR repositories.KeranjangRepository, ProdukR repositories.ProdukRepository) KeranjangService {
+func NewKeranjangService(KeranjangR repositories.KeranjangRepository, ProdukR repositories.ProdukRepository, EventR repositories.EventRepository) KeranjangService {
 	return &keranjangService{
 		KeranjangR: KeranjangR,
 		ProdukR:    ProdukR,
+		EventR:     EventR,
 	}
 }
 
@@ -53,10 +55,10 @@ func (k *keranjangService) CreateService(Keranjang models.Keranjang) (*models.Ke
 
 	p_id := strconv.Itoa(int(produk.ID))
 	payload := models.Keranjang{
-		User_ID: Keranjang.User_ID,
+		User_ID:   Keranjang.User_ID,
 		Produk_ID: p_id,
-		Qty: Keranjang.Qty,
-		Total: Keranjang.Qty * produk.Harga,
+		Qty:       Keranjang.Qty,
+		Total:     Keranjang.Qty * produk.Harga,
 	}
 
 	KeranjangR, err := k.KeranjangR.CreateRepository(payload)

@@ -31,7 +31,7 @@ func (p *pembayaranEventRepository) CreatePembayaranEvent(pembayaranEvent models
 }
 func (p *pembayaranEventRepository) UpdateRepository(pembayaranEvent models.PembayaranEvent) error {
 
-	err := p.DB.Preload("Keranjang").Preload("BuktiPembayaran").Updates(&pembayaranEvent).Error
+	err := p.DB.Preload("Event").Preload("BuktiPembayaran").Updates(&pembayaranEvent).Error
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func (p *pembayaranEventRepository) UpdateRepository(pembayaranEvent models.Pemb
 func (p *pembayaranEventRepository) GetPembayaranEventRepository(id int) (*models.PembayaranEvent, error) {
 	var PembayaranEvent *models.PembayaranEvent
 
-	if err := p.DB.Preload("Keranjang").Preload("MetodePembayaran").Where("id = ?", id).First(&PembayaranEvent).Error; err != nil {
+	if err := p.DB.Preload("Event").Preload("MetodePembayaran").Where("id = ?", id).First(&PembayaranEvent).Error; err != nil {
 		return nil, err
 	}
 
