@@ -107,7 +107,6 @@ func New() *echo.Echo {
 	auth.GET("/keranjang", keranjangC.GetKeranjangsController)
 	auth.GET("/keranjang/:id", keranjangC.GetKeranjangController)
 	auth.POST("/keranjang", keranjangC.CreateController)
-	auth.POST("/keranjang_tiket", keranjangC.CreateEventController)
 	auth.DELETE("/keranjang/:id", keranjangC.DeleteController)
 	auth.PUT("/keranjang/:id", keranjangC.UpdateController)
 
@@ -137,7 +136,7 @@ func New() *echo.Echo {
 
 	auth.POST("/pembayaran_produk", pembayaranProdukC.CreateController)
 	auth.PUT("/bukti_pembayaran/:id", pembayaranProdukC.UploadBuktiPembayaranController)
-	
+
 	auth.POST("/pembayaran_event", pembayaranEventC.CreateController)
 	auth.PUT("/bukti_pembayaran_event/:id", pembayaranEventC.UploadBuktiPembayaranController)
 
