@@ -64,7 +64,7 @@ var (
 	// pembayaranEventC = c.NewPembayaranEventController(PembayaranEventS)
 
 	paymentMethodR = r.NewPaymentMethodRepository(DB)
-  
+
 	dashboardMobileR = r.NewDashboardMobileRepository(DB)
 	dashboardMobileS = s.NewDashboardMobileServices(dashboardMobileR)
 	dashboardMobileC = c.NewDashboardMobileController(dashboardMobileS)
@@ -92,11 +92,8 @@ func New() *echo.Echo {
 	auth.DELETE("/user/:id", userC.DeleteController)
 	auth.PUT("/user/:id", userC.UpdateController)
 	e.POST("/user_login", userC.LoginController)
-<<<<<<< HEAD
 	e.GET("/logout", userC.LogoutController)
-=======
 	e.POST("/forget_password", userC.ForgotPasswordController)
->>>>>>> 6373c6a7dfb47cd9eaef2b39d69eec70d1f00f86
 
 	auth.GET("/admin", profilePerusahaanC.GetProfilePerusahaanController)
 	auth.PUT("/admin", profilePerusahaanC.UpdateController)
